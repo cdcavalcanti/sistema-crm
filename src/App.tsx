@@ -136,9 +136,9 @@ const App = () => (
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <LgpdAnalyticsBanner />
+        {lgpdAnalyticsPermitido() ? <Analytics /> : null}
       </BrowserRouter>
-      <LgpdAnalyticsBanner />
-      {lgpdAnalyticsPermitido() ? <Analytics /> : null}
     </TooltipProvider>
   </QueryClientProvider>
 );
