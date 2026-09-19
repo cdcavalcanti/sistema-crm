@@ -17,6 +17,7 @@ import {
   Webhook,
   Activity,
   Sparkles,
+  Scale,
   LogOut,
   KeyRound,
 } from "lucide-react";
@@ -134,6 +135,16 @@ export function AppSidebar() {
                       <NavLink to="/admin/usuarios" className={navClass}>
                         <Shield className="h-4 w-4" />
                         <span>Usuários</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+                {canManageUsers && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink to="/admin/lgpd" className={navClass}>
+                        <Scale className="h-4 w-4" />
+                        <span>LGPD</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

@@ -474,6 +474,11 @@ export default function Auth() {
               </form>
             )}
           </div>
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            <a href="/privacidade" className="hover:text-foreground hover:underline">
+              Política de privacidade (LGPD)
+            </a>
+          </p>
         </div>
       </section>
     </div>

@@ -252,6 +252,42 @@ sistema-crm/
 - [ ] WhatsApp conectado + 1 template oficial testado
 - [ ] Webhooks do site/Meta apontando para este projeto
 - [ ] `VITE_ALLOW_SIGNUP` e `VITE_UI_PREVIEW` **não** true em produção
+- [ ] LGPD: preencher DPO em `/admin/lgpd`, adaptar `src/lib/lgpd.ts`, aplicar migration `20260919_0035_lgpd.sql`
+- [ ] CI: secrets `SUPABASE_ACCESS_TOKEN` e `PROJECT_REF` se for usar deploy automático do backend
+
+## Docker + Nginx
+
+Frontend em container (build Vite → `nginx:1.27`). Supabase/WAHA/Chatwoot continuam externos.
+
+```bash
+docker compose up --build
+# http://localhost:8080  (CRM_PORT para mudar a porta)
+```
+
+Build direto:
+
+```bash
+docker build \
+  --build-arg VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co \
+  --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=... \
+  -t sistema-crm .
+```
+
+Healthcheck: `GET /healthz`. Config: `docker/nginx.conf` (SPA, headers, cache de `/assets/`).
+
+## CI/CD
+
+Workflows em `.github/workflows/`:
+
+- **CI** (`ci.yml`): lint, testes, `npm run build` e build da imagem Docker em push/PR para `main`.
+- **Deploy backend** (`deploy-backend.yml`): aplica migrations e publica edge functions no merge em `main` (ou `workflow_dispatch`). Sem os secrets, o job só avisa e não falha o restante do CI.
+
+## LGPD
+
+- Política pública: `/privacidade` (texto em `src/lib/lgpd.ts` — troque o controlador)
+- Aceite obrigatório da equipe após o login
+- Banner de analytics (Vercel) com aceite/recusa
+- Painel admin: `/admin/lgpd` (DPO, retenção, solicitações, exportação JSON, anonimização)
 
 ## Comandos
 

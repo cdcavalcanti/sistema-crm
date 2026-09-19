@@ -26,7 +26,10 @@ import Usuarios from "./pages/Usuarios";
 import Logs from "./pages/Logs";
 import Saude from "./pages/Saude";
 import RecursosDev from "./pages/RecursosDev";
+import Privacidade from "./pages/Privacidade";
+import LgpdAdmin from "./pages/LgpdAdmin";
 import NotFound from "./pages/NotFound";
+import { LgpdAnalyticsBanner, LgpdConsentGate, lgpdAnalyticsPermitido } from "./components/lgpd/LgpdConsent";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,11 +45,15 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/privacidade" element={<Privacidade />} />
           <Route path="/aprovar" element={<AprovarMelhoria />} />
           <Route
             element={
               <RequireAuth>
-                <AppLayout />
+                <>
+                  <LgpdConsentGate />
+                  <AppLayout />
+                </>
               </RequireAuth>
             }
           >
@@ -95,6 +102,14 @@ const App = () => (
               }
             />
             <Route
+              path="/admin/lgpd"
+              element={
+                <RequireRole role="admin">
+                  <LgpdAdmin />
+                </RequireRole>
+              }
+            />
+            <Route
               path="/admin/api"
               element={
                 <RequireRole role="super_admin">
@@ -122,7 +137,8 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-      <Analytics />
+      <LgpdAnalyticsBanner />
+      {lgpdAnalyticsPermitido() ? <Analytics /> : null}
     </TooltipProvider>
   </QueryClientProvider>
 );

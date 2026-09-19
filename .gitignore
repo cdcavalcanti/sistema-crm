@@ -36,10 +36,6 @@ dist-ssr
 # Artefatos locais do Supabase CLI
 supabase/.temp/
 
-# Requer escopo 'workflow' no token gh para versionar
-.github/workflows/
-
-
 # secrets locais SDR
 .sdr-*-secret
 *.secret

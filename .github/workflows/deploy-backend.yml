@@ -1,0 +1,73 @@
+name: Deploy backend
+
+# Aplica migrations e faz deploy das edge functions no merge em main.
+# Secrets no GitHub (repositório do cliente):
+#   SUPABASE_ACCESS_TOKEN  — Management API
+#   PROJECT_REF            — ref do projeto Supabase
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - "scripts/aplicar-migrations.mjs"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Apply migrations
+        if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.PROJECT_REF }}
+        run: node scripts/aplicar-migrations.mjs
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy edge functions
+        if: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' && secrets.PROJECT_REF != '' }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          npx supabase link --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy lp-intake --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy meta-leads --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy whatsapp-webhook --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy instagram-chatwoot-webhook --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy instagram-webhook --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy whatsapp-sync --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy agenda-sync --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy auditoria --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy melhorias-monitor --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy sdr-handoff --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy sdr-pausar --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy disparo-worker --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy create-user --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy update-user-role --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy leads --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy whatsapp-send --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy whatsapp-templates --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy whatsapp-send-template --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy whatsapp-status --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy disparos --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy gpt-chat --project-ref "${{ secrets.PROJECT_REF }}"
+
+      - name: Skip notice
+        if: ${{ secrets.SUPABASE_ACCESS_TOKEN == '' }}
+        run: echo "SUPABASE_ACCESS_TOKEN não configurado — pulando deploy. Configure secrets no repositório."

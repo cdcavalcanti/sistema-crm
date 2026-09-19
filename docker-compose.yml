@@ -1,0 +1,20 @@
+# Sistema CRM — frontend (Vite build + nginx)
+#
+# Uso:
+#   docker compose up --build
+#   # ou
+#   docker build --build-arg VITE_SUPABASE_URL=... --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=... -t sistema-crm .
+#
+# Backend (Supabase / WAHA / Chatwoot) continua externo — não sobe neste compose.
+
+services:
+  crm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
+    ports:
+      - "${CRM_PORT:-8080}:80"
+    restart: unless-stopped

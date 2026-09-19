@@ -19,6 +19,8 @@ const PAGE_LABELS: Array<[RegExp, string]> = [
   [/^\/calendario$/, "Calendário"],
   [/^\/pipeline$/, "Pipeline"],
   [/^\/admin\/usuarios$/, "Usuários"],
+  [/^\/admin\/lgpd$/, "LGPD"],
+  [/^\/privacidade$/, "Privacidade"],
   [/^\/admin\/logs$/, "Logs de auditoria"],
 ];
 
