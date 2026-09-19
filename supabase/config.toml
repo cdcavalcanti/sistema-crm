@@ -1,0 +1,43 @@
+# Substitua YOUR_PROJECT_REF pelo project_id do Supabase do cliente.
+project_id = "YOUR_PROJECT_REF"
+
+# verify_jwt por função — o deploy automático (deploy-backend.yml) respeita isto,
+# preservando quais funções são públicas (webhooks/cron/links) e quais exigem login.
+# Default do Supabase é verify_jwt = true; declaramos só as PÚBLICAS aqui.
+
+[functions.lp-intake]
+verify_jwt = false        # formulários do site (POST público)
+
+[functions.meta-leads]
+verify_jwt = false        # webhook do Meta Lead Ads
+
+[functions.whatsapp-webhook]
+verify_jwt = false        # webhook da WAHA (mensagens recebidas)
+
+[functions.instagram-chatwoot-webhook]
+verify_jwt = false        # webhook do Chatwoot (DMs de Instagram recebidas)
+
+[functions.instagram-webhook]
+verify_jwt = false        # webhook do Meta (Instagram Messaging, API direta)
+
+[functions.whatsapp-sync]
+verify_jwt = false        # cron (sincroniza conversas)
+
+[functions.agenda-sync]
+verify_jwt = false        # cron (Google Calendar → CRM)
+
+[functions.auditoria]
+verify_jwt = false        # cron/secret (monitoramento)
+
+[functions.melhorias-monitor]
+verify_jwt = false        # cron/secret (orquestra melhorias)
+
+[functions.sdr-handoff]
+verify_jwt = false        # secret SDR_HANDOFF_SECRET ou Bearer do CRM
+
+[functions.sdr-pausar]
+verify_jwt = false        # secret SDR_PAUSAR_SECRET (macros Chatwoot)
+
+[functions.disparo-worker]
+verify_jwt = false        # cron (?secret=AGENDA_SYNC_SECRET)
+

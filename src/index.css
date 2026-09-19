@@ -1,0 +1,337 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Sistema CRM — Tema comercial
+   Branco + navy (#1a2a4a) + laranja (#f97316)
+   ============================================ */
+
+@layer base {
+  :root {
+    /* Superfícies */
+    --background: 0 0% 100%;
+    --foreground: 220 45% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 45% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 45% 14%;
+
+    /* Primária: navy do logo */
+    --primary: 220 48% 20%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 24% 96%;
+    --secondary-foreground: 220 40% 18%;
+
+    --accent: 24 100% 94%;
+    --accent-foreground: 220 40% 18%;
+
+    --muted: 220 20% 96%;
+    --muted-foreground: 220 12% 42%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 18% 88%;
+    --input: 220 18% 88%;
+    --ring: 24 95% 53%;
+
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 220 30% 97%;
+    --sidebar-foreground: 220 20% 28%;
+    --sidebar-primary: 220 48% 20%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 24 100% 92%;
+    --sidebar-accent-foreground: 220 40% 18%;
+    --sidebar-border: 220 18% 88%;
+    --sidebar-ring: 24 95% 53%;
+
+    /* Marca — laranja */
+    --brand: 24 95% 53%;
+    --brand-soft: 24 100% 90%;
+    --brand-dark: 220 48% 20%;
+  }
+
+  .dark {
+    --background: 220 40% 8%;
+    --foreground: 220 16% 95%;
+    --card: 220 32% 11%;
+    --card-foreground: 220 16% 95%;
+    --popover: 220 32% 11%;
+    --popover-foreground: 220 16% 95%;
+    --primary: 24 95% 55%;
+    --primary-foreground: 220 45% 12%;
+    --secondary: 220 24% 16%;
+    --secondary-foreground: 220 16% 95%;
+    --accent: 220 24% 16%;
+    --accent-foreground: 24 95% 65%;
+    --muted: 220 24% 14%;
+    --muted-foreground: 220 12% 65%;
+    --destructive: 0 65% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 18% 20%;
+    --input: 220 18% 20%;
+    --ring: 24 90% 55%;
+    --sidebar-background: 220 40% 7%;
+    --sidebar-foreground: 220 12% 75%;
+    --sidebar-primary: 24 95% 55%;
+    --sidebar-primary-foreground: 220 45% 12%;
+    --sidebar-accent: 220 24% 14%;
+    --sidebar-accent-foreground: 220 16% 95%;
+    --sidebar-border: 220 18% 14%;
+    --sidebar-ring: 24 90% 55%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+    font-feature-settings: "ss01", "ss02";
+    letter-spacing: -0.012em;
+  }
+  ::selection {
+    background: hsl(var(--brand-soft) / 0.7);
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  .surface-card {
+    @apply rounded-xl border border-border bg-card shadow-card;
+  }
+  .surface-elevated {
+    @apply rounded-xl border border-border bg-card shadow-elegant;
+  }
+  .page-eyebrow {
+    @apply text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground;
+  }
+  .page-title {
+    @apply font-display text-3xl font-semibold tracking-tight text-foreground;
+  }
+  .page-subtitle {
+    @apply text-sm text-muted-foreground;
+  }
+  .text-gradient-brand {
+    background-image: linear-gradient(135deg, hsl(var(--brand)) 0%, hsl(var(--brand-dark)) 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .pattern-grid {
+    background-image:
+      linear-gradient(to right, hsl(210 18% 88% / 0.45) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(210 18% 88% / 0.45) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .divider-rule {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-border to-transparent;
+  }
+}
+
+/* ============================================
+   react-big-calendar — tema comercial (escopado em .rbc-crm)
+   ============================================ */
+.rbc-crm .rbc-calendar {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: hsl(var(--foreground));
+  background: transparent;
+}
+
+/* Grid container */
+.rbc-crm .rbc-month-view,
+.rbc-crm .rbc-time-view,
+.rbc-crm .rbc-agenda-view {
+  border: 1px solid hsl(var(--border));
+  border-radius: 10px;
+  overflow: hidden;
+  background: hsl(var(--card));
+}
+
+/* Cabeçalho dos dias da semana */
+.rbc-crm .rbc-header {
+  background: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 6px;
+}
+.rbc-crm .rbc-header + .rbc-header {
+  border-left: 1px solid hsl(var(--border));
+}
+
+/* Linhas e células */
+.rbc-crm .rbc-month-row + .rbc-month-row {
+  border-top: 1px solid hsl(var(--border));
+}
+.rbc-crm .rbc-day-bg + .rbc-day-bg {
+  border-left: 1px solid hsl(var(--border));
+}
+.rbc-crm .rbc-month-row {
+  min-height: 90px;
+}
+
+/* Off-range (dias do mês anterior/próximo) */
+.rbc-crm .rbc-off-range-bg {
+  background: hsl(var(--muted) / 0.5);
+}
+.rbc-crm .rbc-off-range {
+  color: hsl(var(--muted-foreground) / 0.55);
+}
+
+/* Número do dia */
+.rbc-crm .rbc-date-cell {
+  text-align: right;
+  padding: 6px 8px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+.rbc-crm .rbc-date-cell > a {
+  color: inherit;
+  text-decoration: none;
+  pointer-events: none;
+}
+.rbc-crm .rbc-now .rbc-button-link,
+.rbc-crm .rbc-date-cell.rbc-now {
+  color: hsl(var(--primary));
+  font-weight: 700;
+}
+.rbc-crm .rbc-now .rbc-button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Dia "hoje" */
+.rbc-crm .rbc-today {
+  background: hsl(var(--brand-soft) / 0.28);
+}
+
+/* Eventos — chip estilo limpo */
+.rbc-crm .rbc-event,
+.rbc-crm .crm-event {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  box-shadow: none;
+  margin: 1px 4px;
+  cursor: pointer;
+}
+.rbc-crm .rbc-event:hover {
+  background: hsl(var(--primary) / 0.9);
+}
+.rbc-crm .rbc-event:focus,
+.rbc-crm .rbc-event.rbc-selected {
+  outline: none;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--brand) / 0.45);
+}
+
+/* "+ N mais" */
+.rbc-crm .rbc-show-more {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  background: transparent;
+  font-size: 11px;
+  padding: 1px 6px;
+}
+.rbc-crm .rbc-show-more:hover {
+  text-decoration: underline;
+}
+
+/* Time view (semana/dia) */
+.rbc-crm .rbc-time-header {
+  border-bottom: 1px solid hsl(var(--border));
+}
+.rbc-crm .rbc-time-header-content {
+  border-left: 1px solid hsl(var(--border));
+}
+.rbc-crm .rbc-time-content {
+  border-top: 1px solid hsl(var(--border));
+}
+.rbc-crm .rbc-time-content > * + * > * {
+  border-left-color: hsl(var(--border));
+}
+.rbc-crm .rbc-timeslot-group {
+  border-bottom: 1px solid hsl(var(--border));
+  min-height: 48px;
+}
+.rbc-crm .rbc-time-slot {
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
+}
+.rbc-crm .rbc-time-gutter .rbc-timeslot-group {
+  padding-right: 6px;
+}
+.rbc-crm .rbc-current-time-indicator {
+  background-color: hsl(var(--destructive));
+  height: 2px;
+}
+
+/* Agenda (lista) */
+.rbc-crm .rbc-agenda-view table.rbc-agenda-table {
+  border: none;
+  font-size: 13px;
+}
+.rbc-crm .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.4);
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  text-align: left;
+}
+.rbc-crm .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+  border-top: 1px solid hsl(var(--border));
+  padding: 10px 12px;
+}
+.rbc-crm .rbc-agenda-date-cell,
+.rbc-crm .rbc-agenda-time-cell {
+  white-space: nowrap;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+}
+.rbc-crm .rbc-agenda-empty {
+  padding: 32px;
+  color: hsl(var(--muted-foreground));
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Esconde o toolbar nativo — temos o nosso custom */
+.rbc-crm .rbc-toolbar {
+  display: none;
+}
