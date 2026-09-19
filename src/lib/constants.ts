@@ -44,16 +44,11 @@ export const MOTIVOS_PERDA = [
   "Outros",
 ] as const;
 
-/** Segmentos B2B genéricos (coluna legado segmento / interesse). Edite por cliente. */
+/** Categorias do lead — troque pelos segmentos do cliente (não deixe lista de nichos genéricos na entrega). */
 export const SEGMENTOS_CRM = [
-  "Varejo",
-  "Serviços",
-  "Indústria",
-  "Saúde",
-  "Educação",
-  "Tecnologia",
-  "Imobiliário",
-  "Alimentação",
+  "Segmento A",
+  "Segmento B",
+  "Segmento C",
   "Outro",
 ] as const;
 

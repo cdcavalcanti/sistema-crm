@@ -182,7 +182,7 @@ export function EditarContatoDialog({
               onValueChange={(v) => setForm({ ...form, segmento: v })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Ex.: Varejo" />
+                <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
                 {SEGMENTOS_CRM.map((s) => (

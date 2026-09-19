@@ -2,9 +2,9 @@
 
 Blueprint **white-label** de CRM comercial B2B: funil de vendas + WhatsApp + tarefas + calendário.
 
-Não é ERP de pedidos/delivery. Fork/clone, renomeie a marca, aponte Supabase/WAHA/Chatwoot e adapte segmentos/pipeline para o cliente.
+Não é ERP de pedidos/delivery. Fork/clone por contrato, renomeie a marca, aponte Supabase/WAHA/Chatwoot e **troque segmentos/pipeline pelos do cliente**. A demonstração usa só placeholders (`Empresa exemplo A`) — não é um CRM de um nicho.
 
-Este repositório é o **template**. Instâncias de produto (ex.: um CRM de um cliente específico) nascem a partir daqui — não misture commits com o produto de um cliente.
+Este repositório é o **template**. Instâncias de produto (CRM de um cliente) nascem a partir daqui — não misture commits com o produto de um cliente. Um CRM seu, para acompanhar os contratos que você fecha, é outro fork.
 
 ## Stack
 
@@ -45,7 +45,7 @@ Arquitetura de canais:
 9. Conecte WhatsApp e teste um template oficial.
 10. Aponte webhooks do site/Meta para `lp-intake` / `meta-leads` / `leads`.
 
-Preview de UI sem backend: `VITE_UI_PREVIEW=true` (documentado, **nunca** default em produção). Usuário de preview: `preview@crm.local`.
+Preview de UI sem backend: no `npm run dev` sem Supabase, o login mostra **Demonstração (sem dados reais)** (placeholders só no navegador). Força com `VITE_UI_PREVIEW=true`. **Nunca** ligue isso em produção. Usuário: `preview@crm.local`.
 
 ## Setup inicial
 

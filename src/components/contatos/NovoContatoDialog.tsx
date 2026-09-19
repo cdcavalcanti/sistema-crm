@@ -142,7 +142,7 @@ export function NovoContatoDialog({ trigger }: { trigger?: React.ReactNode }) {
             <Label>Segmento</Label>
             <Select value={segmento || undefined} onValueChange={setSegmento}>
               <SelectTrigger>
-                <SelectValue placeholder="Ex.: Varejo" />
+                <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
                 {SEGMENTOS_CRM.map((s) => (
