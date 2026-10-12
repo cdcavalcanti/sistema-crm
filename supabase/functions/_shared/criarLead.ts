@@ -187,6 +187,34 @@ export async function criarLead(supabase: SupabaseClient, data: LeadInput): Prom
   const etapa = etapaMatch ?? etapasList[0] ?? null;
   const etapaNome = etapa?.nome ?? etapaPedida;
 
+  // -------- Responsável pela regra do tenant (IA / config) --------
+  let responsavel = (data.responsavel ?? "").trim() || null;
+  if (!responsavel) {
+    const { data: cfg } = await supabase
+      .from("ia_tenant_config")
+      .select("regra_atribuicao, responsavel_padrao")
+      .eq("id", true)
+      .maybeSingle();
+    const padrao = (cfg?.responsavel_padrao ?? "").trim() || "Comercial";
+    const regra = cfg?.regra_atribuicao ?? "fixo";
+    if (regra === "round_robin") {
+      const { data: perfis } = await supabase
+        .from("profiles")
+        .select("responsavel_crm")
+        .not("responsavel_crm", "is", null);
+      const labels = [...new Set((perfis ?? []).map((p: { responsavel_crm: string | null }) => (p.responsavel_crm ?? "").trim()).filter(Boolean))];
+      if (labels.length) {
+        const { count } = await supabase.from("oportunidades").select("id", { count: "exact", head: true });
+        responsavel = labels[(count ?? 0) % labels.length];
+      } else {
+        responsavel = padrao;
+      }
+    } else {
+      // fixo | origem → responsável padrão do tenant neste corte
+      responsavel = padrao;
+    }
+  }
+
   // -------- Criar oportunidade --------
   const { data: oportunidade, error: oppErr } = await supabase
     .from("oportunidades")
@@ -200,7 +228,7 @@ export async function criarLead(supabase: SupabaseClient, data: LeadInput): Prom
       origem: data.origem,
       etapa_id: etapa?.id ?? null,
       observacoes: data.observacoes ?? null,
-      responsavel: data.responsavel ?? null,
+      responsavel,
       metadados: data.metadados ?? {},
     })
     .select("id")

@@ -61,7 +61,12 @@ function parseSelect(select: string): { star: boolean; cols: string[]; embeds: E
   if (!select || select === "*") return { star: true, cols: [], embeds: [] };
   const cols: string[] = [];
   const embeds: Embed[] = [];
+  let star = false;
   for (const part of splitTop(select)) {
+    if (part === "*") {
+      star = true;
+      continue;
+    }
     const m = part.match(/^(\w+)(?::(\w+))?(!inner)?\((.*)\)$/);
     if (m) {
       const alias = m[1];
@@ -71,7 +76,7 @@ function parseSelect(select: string): { star: boolean; cols: string[]; embeds: E
     }
     cols.push(part);
   }
-  return { star: false, cols, embeds };
+  return { star, cols, embeds };
 }
 
 function ilike(value: unknown, pattern: string): boolean {

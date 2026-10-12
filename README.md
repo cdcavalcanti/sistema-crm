@@ -20,6 +20,7 @@ Este repositório é o **template**. Instâncias de produto (CRM de um cliente) 
 - Contatos, oportunidades (lista/kanban), tarefas, calendário
 - Chat WhatsApp (WAHA) + templates/disparos Meta (Chatwoot Cloud)
 - Remarketing, dashboard (KPIs da manhã + onboarding do 1º dia)
+- IA no tenant logado: **Pergunte ao CRM** (leitura com citação) na ficha e no funil; **ação na ficha** só grava depois de confirmar; persona em `/admin/ia`. Gateway = o mesmo `OPENAI_API_KEY` do assistente. Cron `crm-ia-eventos` cria follow-up (sem enviar mensagem).
 - Carteira `profiles.responsavel_crm` + RLS
 - Saúde/auditoria (WhatsApp + disparos + demais checks)
 - Usuários/roles, logs, pipeline admin
@@ -91,6 +92,8 @@ npx supabase functions deploy whatsapp-templates
 npx supabase functions deploy whatsapp-send-template
 npx supabase functions deploy sdr-handoff --no-verify-jwt
 npx supabase functions deploy sdr-pausar --no-verify-jwt
+npx supabase functions deploy crm-ia
+npx supabase functions deploy crm-ia-eventos --no-verify-jwt
 ```
 
 > `--no-verify-jwt` em `leads` / `lp-intake` permite chamadas anônimas do site. A função valida o payload.

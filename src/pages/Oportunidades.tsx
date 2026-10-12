@@ -44,6 +44,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { fmtDateTime } from "@/lib/format";
 import { NovaOportunidadeDialog } from "@/components/oportunidades/NovaOportunidadeDialog";
+import { PergunteAoCrm } from "@/components/ia/PergunteAoCrm";
 import { KanbanView } from "@/components/oportunidades/KanbanView";
 import { displayOrigem, ORIGENS_DESTAQUE, OUTRAS_ORIGENS_LABEL } from "@/lib/origem";
 import { exportarOportunidadesXlsx } from "@/lib/exportar-oportunidades";
@@ -171,6 +172,8 @@ export default function Oportunidades() {
           <NovaOportunidadeDialog />
         </div>
       </header>
+
+      <PergunteAoCrm />
 
       {/* Barra de filtros — comum às duas views */}
       <div className="surface-card space-y-3 p-4">

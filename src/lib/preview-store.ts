@@ -139,7 +139,7 @@ function opp(n: number, extra: PreviewRow): PreviewRow {
     responsavel: extra.responsavel ?? "Comercial",
     metadados: {},
     criado_em: extra.criado_em ?? iso(-4),
-    atualizado_em: agora,
+    atualizado_em: extra.atualizado_em ?? extra.criado_em ?? agora,
   };
 }
 
@@ -477,5 +477,21 @@ export function createPreviewDb(): PreviewDb {
     dados_conversa: [],
     gpt_conversas: [],
     gpt_mensagens: [],
+    ia_tenant_config: [
+      {
+        id: true,
+        persona:
+          "Você é a IA comercial deste CRM. Fale em português do Brasil e só use dados que estão no sistema.",
+        o_que_pode_prometer:
+          "Não promete desconto nem envio de mensagem sozinha neste corte.",
+        regra_atribuicao: "fixo",
+        responsavel_padrao: "Comercial",
+        prazo_sem_resposta_horas: 24,
+        dias_sem_atividade: 7,
+        campanha_fria_aprovada: false,
+      },
+    ],
+    ia_consultas: [],
+    ia_propostas: [],
   };
 }

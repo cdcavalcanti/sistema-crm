@@ -149,6 +149,16 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )}
+                {canManageUsers && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink to="/admin/ia" className={navClass}>
+                        <Bot className="h-4 w-4" />
+                        <span>IA do CRM</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
                 {canViewLogs && (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>

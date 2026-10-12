@@ -292,6 +292,57 @@ export type Database = {
         Insert: { telefone: string; nome?: string | null; created_at?: string };
         Update: Partial<Database["public"]["Tables"]["pausar_ia"]["Row"]>;
       };
+      ia_tenant_config: {
+        Row: {
+          id: boolean;
+          persona: string;
+          o_que_pode_prometer: string;
+          regra_atribuicao: string;
+          responsavel_padrao: string;
+          prazo_sem_resposta_horas: number;
+          dias_sem_atividade: number;
+          campanha_fria_aprovada: boolean;
+          atualizado_em: string;
+          atualizado_por: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["ia_tenant_config"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["ia_tenant_config"]["Row"]>;
+      };
+      ia_consultas: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          modo: string;
+          provider: string;
+          modelo: string | null;
+          pergunta: string | null;
+          resposta: string | null;
+          citacoes: Json;
+          oportunidade_id: string | null;
+          criado_em: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["ia_consultas"]["Row"]> & { modo: string; provider?: string };
+        Update: Partial<Database["public"]["Tables"]["ia_consultas"]["Row"]>;
+      };
+      ia_propostas: {
+        Row: {
+          id: string;
+          oportunidade_id: string;
+          user_id: string;
+          status: string;
+          perigo: string;
+          payload: Json;
+          afetados: Json;
+          confirmacao_explicita: string | null;
+          criado_em: string;
+          resolvido_em: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["ia_propostas"]["Row"]> & {
+          oportunidade_id: string;
+          user_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["ia_propostas"]["Row"]>;
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -299,8 +350,6 @@ export type Database = {
       is_admin_or_super: { Args: { _user_id: string }; Returns: boolean };
       meu_responsavel_crm: { Args: Record<string, never>; Returns: string };
       pode_ver_carteira: { Args: { _responsavel: string }; Returns: boolean };
-      registrar_acesso: { Args: Record<string, never>; Returns: undefined };
-    };
       registrar_acesso: { Args: Record<string, never>; Returns: undefined };
       reportar_problema_melhoria: { Args: { _melhoria_id: string }; Returns: undefined };
     };

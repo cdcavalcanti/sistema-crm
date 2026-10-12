@@ -49,6 +49,8 @@ import {
 } from "@/components/oportunidades/MudancaEtapaDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { SdrQualificacaoCard } from "@/components/chat/SdrQualificacaoCard";
+import { PergunteAoCrm } from "@/components/ia/PergunteAoCrm";
+import { IaAcaoFicha } from "@/components/ia/IaAcaoFicha";
 
 export default function OportunidadeDetalhe() {
   const { id } = useParams();
@@ -306,6 +308,8 @@ export default function OportunidadeDetalhe() {
               <p className="whitespace-pre-wrap text-sm">{o.observacoes}</p>
             </div>
           )}
+          <PergunteAoCrm oportunidadeId={o.id ?? id} />
+          <IaAcaoFicha oportunidadeId={o.id ?? id!} />
           <div>
             <h2 className="page-eyebrow mb-3">Comentários</h2>
             <ComentariosOportunidade oportunidadeId={o.id} />

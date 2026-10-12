@@ -28,6 +28,7 @@ import Saude from "./pages/Saude";
 import RecursosDev from "./pages/RecursosDev";
 import Privacidade from "./pages/Privacidade";
 import LgpdAdmin from "./pages/LgpdAdmin";
+import IaConfig from "./pages/IaConfig";
 import NotFound from "./pages/NotFound";
 import { LgpdAnalyticsBanner, LgpdConsentGate, lgpdAnalyticsPermitido } from "./components/lgpd/LgpdConsent";
 
@@ -106,6 +107,14 @@ const App = () => (
               element={
                 <RequireRole role="admin">
                   <LgpdAdmin />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="/admin/ia"
+              element={
+                <RequireRole role="admin">
+                  <IaConfig />
                 </RequireRole>
               }
             />
