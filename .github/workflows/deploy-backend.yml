@@ -69,6 +69,7 @@ jobs:
           npx supabase functions deploy gpt-chat --project-ref "${{ secrets.PROJECT_REF }}"
           npx supabase functions deploy crm-ia --project-ref "${{ secrets.PROJECT_REF }}"
           npx supabase functions deploy crm-ia-eventos --project-ref "${{ secrets.PROJECT_REF }}"
+          npx supabase functions deploy indicadores-ads --project-ref "${{ secrets.PROJECT_REF }}"
 
       - name: Skip notice
         if: ${{ secrets.SUPABASE_ACCESS_TOKEN == '' }}

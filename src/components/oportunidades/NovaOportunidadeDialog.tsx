@@ -56,10 +56,12 @@ export function NovaOportunidadeDialog({
   trigger,
   contatoIdPadrao,
   etapaIdPadrao,
+  funilId,
 }: {
   trigger?: React.ReactNode;
   contatoIdPadrao?: string;
   etapaIdPadrao?: string;
+  funilId?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [contatoId, setContatoId] = useState<string | null>(contatoIdPadrao ?? null);
@@ -79,12 +81,11 @@ export function NovaOportunidadeDialog({
   const qc = useQueryClient();
 
   const { data: etapas } = useQuery({
-    queryKey: ["etapas"],
+    queryKey: ["etapas", funilId ?? "todos"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("etapas")
-        .select("id, nome, cor, ordem")
-        .order("ordem");
+      let q = supabase.from("etapas").select("id, nome, cor, ordem, funil_id").order("ordem");
+      if (funilId) q = q.eq("funil_id", funilId);
+      const { data, error } = await q;
       if (error) throw error;
       return data ?? [];
     },
@@ -112,8 +113,9 @@ export function NovaOportunidadeDialog({
       // fica com etapa_id null e NÃO aparece em nenhuma coluna do kanban.
       let etapaFinal = data.etapa_id || null;
       if (!etapaFinal) {
-        const { data: e1 } = await supabase
-          .from("etapas").select("id").order("ordem", { ascending: true }).limit(1).maybeSingle();
+        let q = supabase.from("etapas").select("id").order("ordem", { ascending: true }).limit(1);
+        if (funilId) q = q.eq("funil_id", funilId);
+        const { data: e1 } = await q.maybeSingle();
         etapaFinal = e1?.id ?? null;
       }
       const { data: opp, error } = await supabase
@@ -127,6 +129,7 @@ export function NovaOportunidadeDialog({
           responsavel: data.responsavel || null,
           origem: data.origem,
           etapa_id: etapaFinal,
+          funil_id: funilId || null,
           observacoes: data.observacoes || null,
         })
         .select("id")

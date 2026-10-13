@@ -6,28 +6,51 @@ import { useAuth, type AppRole } from "@/hooks/useAuth";
 
 const PAGE_LABELS: Array<[RegExp, string]> = [
   [/^\/$/, "Dashboard"],
-  [/^\/contatos$/, "Contatos"],
+  [/^\/contatos$/, "Leads"],
   [/^\/contatos\/.+/, "Detalhe do contato"],
-  [/^\/oportunidades$/, "Oportunidades"],
+  [/^\/empresas$/, "Empresas"],
+  [/^\/empresas\/.+/, "Empresa"],
+  [/^\/pedidos$/, "Pedidos"],
+  [/^\/orcamentos$/, "Orçamentos"],
+  [/^\/propostas$/, "Propostas"],
+  [/^\/oportunidades$/, "Funis"],
   [/^\/oportunidades\/.+/, "Detalhe da oportunidade"],
+  [/^\/indice$/, "Painel índice"],
+  [/^\/diagnosticos$/, "Diagnósticos"],
+  [/^\/equipe$/, "Painel da equipe"],
+  [/^\/nps$/, "Funil de NPS"],
+  [/^\/indicadores$/, "Indicadores"],
+  [/^\/planning$/, "Planning"],
   [/^\/tarefas$/, "Tarefas"],
-  [/^\/chat$/, "Chat"],
+  [/^\/chat$/, "Mensagens"],
+  [/^\/ligacoes$/, "Ligações"],
+  [/^\/atendimento$/, "Atendimento"],
+  [/^\/email$/, "E-mail marketing"],
   [/^\/remarketing$/, "Remarketing"],
   [/^\/meta$/, "Meta / Disparos"],
+  [/^\/gestao$/, "Central de gestão"],
+  [/^\/reunioes$/, "Auditoria de reuniões"],
+  [/^\/outbound$/, "Prospecção outbound"],
   [/^\/melhorias$/, "Melhorias internas"],
   [/^\/relatorios$/, "Relatórios"],
-  [/^\/calendario$/, "Calendário"],
-  [/^\/pipeline$/, "Pipeline"],
+  [/^\/calendario$/, "Agenda"],
+  [/^\/pipeline$/, "Etapas"],
+  [/^\/importar$/, "Importar"],
+  [/^\/campos$/, "Campos personalizados"],
+  [/^\/automacoes$/, "Automações"],
+  [/^\/papeis$/, "Papéis"],
   [/^\/admin\/usuarios$/, "Usuários"],
   [/^\/admin\/lgpd$/, "LGPD"],
-  [/^\/admin\/ia$/, "IA do CRM"],
+  [/^\/admin\/ia$/, "Auditoria IA comercial"],
   [/^\/privacidade$/, "Privacidade"],
+  [/^\/admin\/api$/, "Blueprint (links)"],
+  [/^\/admin\/saude$/, "Saúde"],
   [/^\/admin\/logs$/, "Logs de auditoria"],
 ];
 
 function pageLabel(pathname: string) {
   for (const [re, label] of PAGE_LABELS) if (re.test(pathname)) return label;
-  return "Sistema CRM";
+  return "VORTEX";
 }
 
 const ROLE_LABEL: Record<AppRole, string> = {
@@ -52,15 +75,15 @@ export function AppLayout() {
         <div className="flex min-w-0 flex-1 flex-col">
           {isPreview && (
             <div className="bg-amber-500/15 px-4 py-1.5 text-center text-xs font-medium text-amber-800 dark:text-amber-200">
-              Modo preview — UI só. Sem Supabase: listas vazias e ações não gravam.
+              Modo preview — dados fictícios em memória. Sem Supabase: nada grava no servidor.
             </div>
           )}
           <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/80 bg-background/85 px-6 backdrop-blur-md">
             <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
             <div className="hidden h-6 w-px bg-border sm:block" />
             <div className="hidden flex-col leading-none sm:flex">
-              <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                CRM comercial
+              <span className="text-[10px] font-medium uppercase tracking-[0.42em] text-muted-foreground">
+                VORTEX
               </span>
               <span className="mt-1 text-sm font-medium text-foreground">{label}</span>
             </div>
@@ -76,7 +99,7 @@ export function AppLayout() {
                   </div>
                 )}
               </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground shadow-card">
+              <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-[hsl(var(--void))] text-sm font-medium text-[hsl(var(--silver))]">
                 {initial}
               </div>
             </div>

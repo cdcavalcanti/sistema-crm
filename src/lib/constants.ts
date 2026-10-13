@@ -1,10 +1,24 @@
-﻿/** Pipeline comercial B2B genérico — edite para o cliente. */
+﻿export const FUNIS_CRM = [
+  { slug: "comercial", nome: "Comercial", cor: "#6D4CFF", tipo: "vendas" },
+  { slug: "nps", nome: "NPS / CS", cor: "#10b981", tipo: "nps" },
+  { slug: "diagnostico", nome: "Diagnóstico", cor: "#0ea5e9", tipo: "diagnostico" },
+] as const;
+
+export const ETAPAS_NPS = [
+  { nome: "Agendamento do onboarding", cor: "#10b981", tipo: "andamento" },
+  { nome: "Onboarding realizado", cor: "#14b8a6", tipo: "andamento" },
+  { nome: "Entrega de quick-wins", cor: "#06b6d4", tipo: "andamento" },
+  { nome: "Entrega do projeto principal", cor: "#3b82f6", tipo: "andamento" },
+  { nome: "NPS", cor: "#6D4CFF", tipo: "ganho" },
+] as const;
+
+/** Pipeline comercial B2B genérico — edite para o cliente. */
 export const ETAPAS_CRM = [
   { nome: "Lead novo", cor: "#3b82f6", tipo: "inicial" },
   { nome: "Qualificação", cor: "#06b6d4", tipo: "andamento" },
   { nome: "Atendimento humano", cor: "#8b5cf6", tipo: "andamento" },
   { nome: "Demo agendada", cor: "#a855f7", tipo: "andamento" },
-  { nome: "Demo realizada", cor: "#f97316", tipo: "andamento" },
+  { nome: "Demo realizada", cor: "#6D4CFF", tipo: "andamento" },
   { nome: "Proposta enviada", cor: "#eab308", tipo: "andamento" },
   { nome: "Negociação", cor: "#14b8a6", tipo: "andamento" },
   { nome: "Follow-up / Remarketing", cor: "#0ea5e9", tipo: "remarketing" },
@@ -16,6 +30,7 @@ export const ORIGENS_OPORTUNIDADE = [
   { value: "formulario_site", label: "Formulário do site" },
   { value: "instagram", label: "Instagram" },
   { value: "meta_ads", label: "Meta Ads" },
+  { value: "google_ads", label: "Google Ads" },
   { value: "whatsapp", label: "WhatsApp" },
   { value: "indicacao", label: "Indicação" },
   { value: "manual", label: "Cadastro manual" },
@@ -32,7 +47,7 @@ export const STATUS_TAREFA = [
 export const PRIORIDADE_TAREFA = [
   { value: "baixa", label: "Baixa", cor: "#9ca3af" },
   { value: "media", label: "Média", cor: "#3b82f6" },
-  { value: "alta", label: "Alta", cor: "#f97316" },
+  { value: "alta", label: "Alta", cor: "#6D4CFF" },
   { value: "urgente", label: "Urgente", cor: "#ef4444" },
 ] as const;
 

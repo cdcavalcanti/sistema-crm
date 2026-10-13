@@ -38,6 +38,25 @@ export function fmtNumber(value: number | null | undefined) {
   return numberFmt.format(value);
 }
 
+export function fmtPct(value: number | null | undefined, digits = 2) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  return `${value.toFixed(digits).replace(".", ",")}%`;
+}
+
+export function fmtDuracao(seg: number | null | undefined) {
+  if (seg == null || !Number.isFinite(seg) || seg < 0) return "—";
+  const m = Math.floor(seg / 60);
+  const s = Math.round(seg % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+export function iniciais(nome: string | null | undefined) {
+  const parts = (nome ?? "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export function fmtPhone(raw: string | null | undefined) {
   if (!raw) return "—";
   const digits = raw.replace(/\D/g, "");

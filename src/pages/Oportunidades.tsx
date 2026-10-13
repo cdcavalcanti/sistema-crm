@@ -10,6 +10,7 @@ import {
   X,
   Trash2,
   FileSpreadsheet,
+  Settings2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -65,6 +66,7 @@ export default function Oportunidades() {
   const [params, setParams] = useSearchParams();
   // Default agora é kanban (passa view=lista pra ir pra lista)
   const view = (params.get("view") === "lista" ? "lista" : "kanban") as "kanban" | "lista";
+  const funilSlug = params.get("funil") ?? "comercial";
   const [page, setPage] = useState(0);
   const [filters, setFilters] = useState<OportunidadeFilters>(FILTROS_VAZIOS);
   const [exportando, setExportando] = useState(false);
@@ -107,6 +109,16 @@ export default function Oportunidades() {
   };
 
   // Lista de responsáveis distintos pra popular o dropdown
+  const { data: funis = [] } = useQuery({
+    queryKey: ["funis"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("funis").select("*").order("ordem");
+      if (error) return [];
+      return data ?? [];
+    },
+  });
+  const funilAtual = funis.find((f: { slug: string }) => f.slug === funilSlug) ?? funis[0] ?? null;
+
   const { data: responsaveis = [] } = useQuery({
     queryKey: ["responsaveis-distintos"],
     queryFn: fetchResponsaveisDisponiveis,
@@ -114,7 +126,7 @@ export default function Oportunidades() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["oportunidades", "lista", filters, page],
+    queryKey: ["oportunidades", "lista", filters, page, (funilAtual as { id?: string } | null)?.id],
     enabled: view === "lista",
     queryFn: async () => {
       const contatoIds = await fetchContatoIdsForSearch(filters.searchText);
@@ -126,6 +138,8 @@ export default function Oportunidades() {
         )
         .order("criado_em", { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+      const funilIdLista = (funilAtual as { id?: string } | null)?.id;
+      if (funilIdLista) query = query.eq("funil_id", funilIdLista);
       query = applyOportunidadeFiltros(query, filters, contatoIds);
       const { data, error, count } = await query;
       if (error) throw error;
@@ -142,16 +156,24 @@ export default function Oportunidades() {
     <div className="space-y-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="page-eyebrow">Pipeline comercial</p>
-          <h1 className="page-title">Oportunidades</h1>
-          <p className="page-subtitle">Acompanhe cada lead do primeiro contato até o fechamento.</p>
+          <p className="page-eyebrow">Operação</p>
+          <h1 className="page-title">Funis</h1>
+          <p className="page-subtitle">Kanban ou lista. Selecione o funil — Comercial, NPS/CS ou Diagnóstico.</p>
         </div>
         <div className="flex items-center gap-2">
+          {isAdmin && (
+            <Button variant="outline" asChild>
+              <Link to="/pipeline">
+                <Settings2 className="mr-2 h-4 w-4" />
+                Configurar etapas
+              </Link>
+            </Button>
+          )}
           <div className="flex rounded-lg border border-border bg-card p-0.5">
             <Button
               variant={view === "kanban" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setParams({})}
+              onClick={() => setParams(funilSlug === "comercial" ? {} : { funil: funilSlug })}
             >
               <LayoutGrid className="mr-2 h-3.5 w-3.5" />
               Kanban
@@ -159,7 +181,9 @@ export default function Oportunidades() {
             <Button
               variant={view === "lista" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setParams({ view: "lista" })}
+              onClick={() =>
+                setParams(funilSlug === "comercial" ? { view: "lista" } : { view: "lista", funil: funilSlug })
+              }
             >
               <List className="mr-2 h-3.5 w-3.5" />
               Lista
@@ -169,9 +193,40 @@ export default function Oportunidades() {
             <FileSpreadsheet className="mr-2 h-4 w-4" />
             {exportando ? "Gerando…" : "Gerar Relatório"}
           </Button>
-          <NovaOportunidadeDialog />
+          <NovaOportunidadeDialog funilId={(funilAtual as { id?: string } | null)?.id ?? null} />
         </div>
       </header>
+
+      {funis.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {funis.map((f: { id: string; nome: string; slug: string; cor: string | null }) => {
+            const ativo = (funilAtual as { slug?: string } | null)?.slug === f.slug;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() =>
+                  setParams(
+                    view === "lista"
+                      ? { view: "lista", ...(f.slug === "comercial" ? {} : { funil: f.slug }) }
+                      : f.slug === "comercial"
+                        ? {}
+                        : { funil: f.slug },
+                  )
+                }
+                className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  ativo
+                    ? "border-transparent text-white"
+                    : "border-border bg-background text-muted-foreground hover:text-foreground"
+                }`}
+                style={ativo ? { background: f.cor ?? "#6D4CFF" } : undefined}
+              >
+                {f.nome}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <PergunteAoCrm />
 
@@ -282,7 +337,7 @@ export default function Oportunidades() {
       </div>
 
       {view === "kanban" ? (
-        <KanbanView filters={filters} />
+        <KanbanView filters={filters} funilId={(funilAtual as { id?: string } | null)?.id ?? null} />
       ) : (
         <div className="surface-card divide-y divide-border/60">
           <Table>

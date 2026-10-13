@@ -18,7 +18,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
-        display: ["Fraunces", "'Playfair Display'", "Georgia", "serif"],
+        display: ["Michroma", "Eurostile", "'Arial Black'", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -72,14 +72,13 @@ export default {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "var(--radius)",
+        sm: "var(--radius)",
       },
       boxShadow: {
-        card: "0 1px 2px hsl(220 22% 12% / 0.04), 0 1px 3px hsl(220 22% 12% / 0.05)",
-        elegant:
-          "0 1px 2px hsl(220 22% 12% / 0.04), 0 8px 24px -10px hsl(220 22% 12% / 0.10), 0 24px 48px -24px hsl(220 22% 12% / 0.12)",
-        ring: "0 0 0 4px hsl(212 65% 45% / 0.18)",
+        card: "0 1px 2px hsl(240 18% 3% / 0.06)",
+        elegant: "0 20px 40px hsl(240 18% 3% / 0.18)",
+        ring: "0 0 0 3px hsl(251 100% 65% / 0.22)",
       },
       keyframes: {
         "accordion-down": {

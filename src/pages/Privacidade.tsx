@@ -9,7 +9,7 @@ export default function Privacidade() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
-          <CrmLogo className="h-10" />
+          <CrmLogo mark="mono" className="h-10 text-foreground" />
           <Link to="/auth" className="text-sm font-medium text-primary hover:underline">
             Voltar ao login
           </Link>
@@ -28,7 +28,7 @@ export default function Privacidade() {
         </div>
         {LGPD_POLITICA.secoes.map((s) => (
           <section key={s.titulo} className="space-y-2">
-            <h2 className="font-display text-lg font-semibold">{s.titulo}</h2>
+            <h2 className="text-lg font-medium">{s.titulo}</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">{s.corpo}</p>
           </section>
         ))}

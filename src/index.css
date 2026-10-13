@@ -1,92 +1,94 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Michroma&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================================
-   Sistema CRM — Tema comercial
-   Branco + navy (#1a2a4a) + laranja (#f97316)
+   VORTEX — CRM base (Manual de marca v1.0)
+   Void #07070A · Graphite #15151B · Bone #F4F1EA
+   Violet #6D4CFF só como acento / ponta do V
    ============================================ */
 
 @layer base {
   :root {
-    /* Superfícies */
-    --background: 0 0% 100%;
-    --foreground: 220 45% 14%;
+    --background: 48 24% 96%;
+    --foreground: 240 15% 5%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 45% 14%;
+    --card: 40 31% 94%;
+    --card-foreground: 240 15% 5%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 45% 14%;
+    --popover: 40 31% 94%;
+    --popover-foreground: 240 15% 5%;
 
-    /* Primária: navy do logo */
-    --primary: 220 48% 20%;
+    --primary: 251 100% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 24% 96%;
-    --secondary-foreground: 220 40% 18%;
+    --secondary: 40 18% 91%;
+    --secondary-foreground: 240 15% 5%;
 
-    --accent: 24 100% 94%;
-    --accent-foreground: 220 40% 18%;
+    --accent: 251 100% 96%;
+    --accent-foreground: 240 15% 5%;
 
-    --muted: 220 20% 96%;
-    --muted-foreground: 220 12% 42%;
+    --muted: 40 14% 92%;
+    --muted-foreground: 240 6% 38%;
 
     --destructive: 0 72% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 18% 88%;
-    --input: 220 18% 88%;
-    --ring: 24 95% 53%;
+    --border: 47 11% 83%;
+    --input: 47 11% 83%;
+    --ring: 251 100% 65%;
 
-    --radius: 0.75rem;
+    --radius: 2px;
 
-    /* Sidebar */
-    --sidebar-background: 220 30% 97%;
-    --sidebar-foreground: 220 20% 28%;
-    --sidebar-primary: 220 48% 20%;
+    --sidebar-background: 240 18% 3%;
+    --sidebar-foreground: 240 11% 85%;
+    --sidebar-primary: 251 100% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 24 100% 92%;
-    --sidebar-accent-foreground: 220 40% 18%;
-    --sidebar-border: 220 18% 88%;
-    --sidebar-ring: 24 95% 53%;
+    --sidebar-accent: 240 13% 9%;
+    --sidebar-accent-foreground: 240 11% 92%;
+    --sidebar-border: 240 10% 16%;
+    --sidebar-ring: 251 100% 65%;
 
-    /* Marca — laranja */
-    --brand: 24 95% 53%;
-    --brand-soft: 24 100% 90%;
-    --brand-dark: 220 48% 20%;
+    --brand: 251 100% 65%;
+    --brand-soft: 251 80% 92%;
+    --brand-dark: 240 18% 3%;
+    --void: 240 18% 3%;
+    --graphite: 240 13% 9%;
+    --steel: 240 6% 58%;
+    --silver: 240 11% 85%;
+    --bone: 40 31% 94%;
   }
 
   .dark {
-    --background: 220 40% 8%;
-    --foreground: 220 16% 95%;
-    --card: 220 32% 11%;
-    --card-foreground: 220 16% 95%;
-    --popover: 220 32% 11%;
-    --popover-foreground: 220 16% 95%;
-    --primary: 24 95% 55%;
-    --primary-foreground: 220 45% 12%;
-    --secondary: 220 24% 16%;
-    --secondary-foreground: 220 16% 95%;
-    --accent: 220 24% 16%;
-    --accent-foreground: 24 95% 65%;
-    --muted: 220 24% 14%;
-    --muted-foreground: 220 12% 65%;
+    --background: 240 18% 3%;
+    --foreground: 240 15% 94%;
+    --card: 240 13% 9%;
+    --card-foreground: 240 15% 94%;
+    --popover: 240 13% 9%;
+    --popover-foreground: 240 15% 94%;
+    --primary: 251 100% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 13% 12%;
+    --secondary-foreground: 240 15% 94%;
+    --accent: 240 13% 12%;
+    --accent-foreground: 251 100% 77%;
+    --muted: 240 13% 11%;
+    --muted-foreground: 240 8% 63%;
     --destructive: 0 65% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 18% 20%;
-    --input: 220 18% 20%;
-    --ring: 24 90% 55%;
-    --sidebar-background: 220 40% 7%;
-    --sidebar-foreground: 220 12% 75%;
-    --sidebar-primary: 24 95% 55%;
-    --sidebar-primary-foreground: 220 45% 12%;
-    --sidebar-accent: 220 24% 14%;
-    --sidebar-accent-foreground: 220 16% 95%;
-    --sidebar-border: 220 18% 14%;
-    --sidebar-ring: 24 90% 55%;
+    --border: 240 10% 16%;
+    --input: 240 10% 16%;
+    --ring: 251 100% 65%;
+    --sidebar-background: 240 18% 3%;
+    --sidebar-foreground: 240 11% 85%;
+    --sidebar-primary: 251 100% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 13% 9%;
+    --sidebar-accent-foreground: 240 15% 94%;
+    --sidebar-border: 240 10% 16%;
+    --sidebar-ring: 251 100% 65%;
   }
 }
 
@@ -99,46 +101,45 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    font-weight: 400;
+    line-height: 1.6;
   }
-  h1, h2, h3, .font-display {
-    font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
-    font-feature-settings: "ss01", "ss02";
-    letter-spacing: -0.012em;
+  .font-display {
+    font-family: Michroma, Eurostile, "Arial Black", sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
   ::selection {
-    background: hsl(var(--brand-soft) / 0.7);
+    background: hsl(var(--brand) / 0.22);
     color: hsl(var(--foreground));
   }
 }
 
 @layer components {
   .surface-card {
-    @apply rounded-xl border border-border bg-card shadow-card;
+    @apply rounded-sm border border-border bg-card shadow-card;
   }
   .surface-elevated {
-    @apply rounded-xl border border-border bg-card shadow-elegant;
+    @apply rounded-sm border border-border bg-card shadow-elegant;
+    border-bottom: 4px solid hsl(var(--brand));
   }
   .page-eyebrow {
-    @apply text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground;
+    @apply text-[11px] font-medium uppercase tracking-[0.42em] text-muted-foreground;
   }
   .page-title {
-    @apply font-display text-3xl font-semibold tracking-tight text-foreground;
+    @apply font-display text-2xl text-foreground sm:text-[1.7rem];
   }
   .page-subtitle {
-    @apply text-sm text-muted-foreground;
+    @apply text-sm font-light text-muted-foreground;
   }
   .text-gradient-brand {
-    background-image: linear-gradient(135deg, hsl(var(--brand)) 0%, hsl(var(--brand-dark)) 90%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    color: hsl(var(--foreground));
   }
   .pattern-grid {
     background-image:
-      linear-gradient(to right, hsl(210 18% 88% / 0.45) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(210 18% 88% / 0.45) 1px, transparent 1px);
+      linear-gradient(to right, hsl(var(--silver) / 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--silver) / 0.08) 1px, transparent 1px);
     background-size: 32px 32px;
   }
   .divider-rule {
@@ -147,7 +148,7 @@
 }
 
 /* ============================================
-   react-big-calendar — tema comercial (escopado em .rbc-crm)
+   react-big-calendar — tokens Vortex (escopado em .rbc-crm)
    ============================================ */
 .rbc-crm .rbc-calendar {
   font-family: 'Inter', system-ui, sans-serif;

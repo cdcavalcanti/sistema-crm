@@ -73,13 +73,40 @@ export default function OportunidadeDetalhe() {
         supabase
           .from("oportunidades")
           .select(
-            "*, contato:contatos(id, nome, email, telefone), etapa:etapas(id, nome, cor, tipo)",
+            "*, contato:contatos(id, nome, email, telefone, cargo, empresa_id), etapa:etapas(id, nome, cor, tipo, funil_id), empresa:empresas(id, nome)",
           )
           .eq("id", id!)
           .maybeSingle(),
-        supabase.from("etapas").select("id, nome, cor, tipo, ordem").order("ordem"),
+        supabase.from("etapas").select("id, nome, cor, tipo, ordem, funil_id").order("ordem"),
       ]);
-      return { oportunidade: opp.data, etapas: etapas.data ?? [] };
+      const contatoId = opp.data?.contato_id as string | undefined;
+      const [tarefas, orcs, reunioes, conv] = await Promise.all([
+        supabase.from("tarefas").select("id, titulo, status, due_date").eq("oportunidade_id", id!).limit(8),
+        supabase.from("orcamentos").select("id, titulo, status, valor").eq("oportunidade_id", id!).limit(8),
+        supabase.from("reuniao_notas").select("id, titulo, status, data_reuniao, notas").eq("oportunidade_id", id!).limit(8),
+        contatoId
+          ? supabase.from("conversas").select("id, wa_chat_id, telefone").eq("contato_id", contatoId).limit(1).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
+      let msgs: { id: string; direcao: string; corpo: string | null; criado_em: string }[] = [];
+      if (conv.data?.id) {
+        const m = await supabase
+          .from("mensagens")
+          .select("id, direcao, corpo, criado_em")
+          .eq("conversa_id", conv.data.id)
+          .order("criado_em", { ascending: false })
+          .limit(8);
+        msgs = (m.data ?? []).reverse();
+      }
+      return {
+        oportunidade: opp.data,
+        etapas: etapas.data ?? [],
+        tarefas: tarefas.data ?? [],
+        orcamentos: orcs.data ?? [],
+        reunioes: reunioes.data ?? [],
+        conversa: conv.data,
+        mensagens: msgs,
+      };
     },
   });
 
@@ -153,9 +180,17 @@ export default function OportunidadeDetalhe() {
   }
 
   const o = data.oportunidade;
+  const funilId = o.funil_id ?? o.etapa?.funil_id;
+  const etapasFunil = (data.etapas as { id: string; funil_id?: string | null }[]).filter(
+    (e) => !funilId || !e.funil_id || e.funil_id === funilId,
+  );
+  const diasFunil = Math.max(
+    0,
+    Math.floor((Date.now() - new Date(o.criado_em).getTime()) / 86_400_000),
+  );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={() => navigate(-1)}>
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -204,11 +239,34 @@ export default function OportunidadeDetalhe() {
           {o.etapa?.nome ?? "—"}
         </p>
         <h1 className="page-title">{o.titulo ?? `Oportunidade · ${o.contato?.nome ?? "—"}`}</h1>
-        <p className="page-subtitle">Criada em {fmtDateTime(o.criado_em)} · {displayOrigem(o.origem)}</p>
+        <p className="page-subtitle">
+          Criada em {fmtDateTime(o.criado_em)} · no funil há {diasFunil} {diasFunil === 1 ? "dia" : "dias"} · {displayOrigem(o.origem)}
+        </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="surface-card space-y-4 p-6 lg:col-span-1">
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {etapasFunil.map((e: { id: string; nome: string; cor: string | null }) => {
+          const ativa = e.id === o.etapa_id;
+          return (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => onSelecionarEtapa(e.id)}
+              className={`min-w-[9rem] rounded-sm border px-3 py-2 text-left text-xs ${
+                ativa ? "border-primary bg-primary/10 font-medium" : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              <span className="mb-1 block h-1.5 w-1.5 rounded-full" style={{ background: e.cor ?? "#999" }} />
+              {e.nome}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="space-y-6">
+        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="surface-card space-y-4 p-6">
           <h2 className="page-eyebrow">Resumo</h2>
           <div className="flex items-center gap-2 text-sm">
             <User className="h-4 w-4 text-muted-foreground" />
@@ -227,10 +285,14 @@ export default function OportunidadeDetalhe() {
             <div className="text-xs text-muted-foreground">{o.contato.telefone}</div>
           )}
           <div className="divider-rule" />
-          {o.nome_estabelecimento && (
+          {(o.empresa || o.nome_estabelecimento) && (
             <div className="flex items-center gap-2 text-sm">
               <Store className="h-4 w-4 text-muted-foreground" />
-              {o.nome_estabelecimento}
+              {o.empresa?.id ? (
+                <Link to={`/empresas/${o.empresa.id}`} className="hover:underline">{o.empresa.nome}</Link>
+              ) : (
+                o.nome_estabelecimento
+              )}
               {o.anos_operacao != null && (
                 <span className="text-xs text-muted-foreground">· {o.anos_operacao} anos de operação</span>
               )}
@@ -295,7 +357,65 @@ export default function OportunidadeDetalhe() {
           </div>
         </div>
 
-        <div className="surface-card space-y-6 p-6 lg:col-span-2">
+        <div className="surface-card space-y-4 p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="page-eyebrow">Ações rápidas</h2>
+            <Button variant="outline" size="sm" onClick={() => setEditando(true)}>Editar</Button>
+          </div>
+          <p className="text-sm"><span className="text-muted-foreground">Valor</span> · {o.valor != null ? o.valor : "—"}</p>
+          <p className="text-sm"><span className="text-muted-foreground">Responsável</span> · {o.responsavel ?? "—"}</p>
+          {o.dor_cliente && <p className="text-sm"><span className="text-muted-foreground">Dor</span> · {o.dor_cliente}</p>}
+        </div>
+        </div>
+
+        <div className="surface-card space-y-3 p-5">
+          <h2 className="page-eyebrow">Relacionamento</h2>
+          <p className="text-sm"><span className="text-muted-foreground">Cargo</span> · {o.cargo_contato ?? o.contato?.cargo ?? "—"}</p>
+          <p className="text-sm"><span className="text-muted-foreground">Dor do cliente</span> · {o.dor_cliente ?? "—"}</p>
+          <p className="text-sm"><span className="text-muted-foreground">Impacto no negócio</span> · {o.impacto_negocio ?? "—"}</p>
+        </div>
+
+        <div className="surface-card space-y-3 p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="page-eyebrow">Tarefas</h2>
+            <Link to="/tarefas" className="text-xs text-primary hover:underline">Nova tarefa</Link>
+          </div>
+          {(data.tarefas as { id: string; titulo: string; status: string }[]).length === 0 && (
+            <p className="text-sm text-muted-foreground">Nenhuma tarefa neste negócio.</p>
+          )}
+          {(data.tarefas as { id: string; titulo: string; status: string; due_date: string | null }[]).map((t) => (
+            <p key={t.id} className="text-sm">{t.titulo} · <span className="text-muted-foreground">{t.status}</span></p>
+          ))}
+        </div>
+        <div className="surface-card space-y-3 p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="page-eyebrow">Reuniões</h2>
+            <Link to="/reunioes" className="text-xs text-primary hover:underline">Agendar</Link>
+          </div>
+          {(data.reunioes as { id: string; titulo: string; data_reuniao: string | null; notas: string | null }[]).length === 0 && (
+            <p className="text-sm text-muted-foreground">Nenhuma reunião. Agenda no calendário deste CRM.</p>
+          )}
+          {(data.reunioes as { id: string; titulo: string; data_reuniao: string | null; notas: string | null }[]).map((r) => (
+            <div key={r.id} className="text-sm">
+              <p className="font-medium">{r.titulo} · {fmtDate(r.data_reuniao)}</p>
+              {r.notas && <p className="mt-1 text-muted-foreground">{r.notas}</p>}
+            </div>
+          ))}
+        </div>
+        <div className="surface-card space-y-3 p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="page-eyebrow">Orçamentos</h2>
+            <Link to="/orcamentos" className="text-xs text-primary hover:underline">Novo orçamento</Link>
+          </div>
+          {(data.orcamentos as { id: string; titulo: string; status: string; valor: number | null }[]).length === 0 && (
+            <p className="text-sm text-muted-foreground">Nenhum orçamento neste negócio.</p>
+          )}
+          {(data.orcamentos as { id: string; titulo: string; status: string; valor: number | null }[]).map((r) => (
+            <p key={r.id} className="text-sm">{r.titulo} · {r.status} · {r.valor ?? "—"}</p>
+          ))}
+        </div>
+
+        <div className="surface-card space-y-6 p-6">
           {o.descricao && (
             <div>
               <h2 className="page-eyebrow mb-2">Descrição</h2>
@@ -311,10 +431,38 @@ export default function OportunidadeDetalhe() {
           <PergunteAoCrm oportunidadeId={o.id ?? id} />
           <IaAcaoFicha oportunidadeId={o.id ?? id!} />
           <div>
-            <h2 className="page-eyebrow mb-3">Comentários</h2>
+            <h2 className="page-eyebrow mb-3">Linha do tempo · comentários</h2>
             <ComentariosOportunidade oportunidadeId={o.id} />
           </div>
         </div>
+        </div>
+
+        <aside className="surface-card flex max-h-[80vh] flex-col p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="page-eyebrow">Conversa</p>
+            {data.conversa?.id && (
+              <Link to="/chat" className="text-xs text-primary hover:underline">Abrir chat</Link>
+            )}
+          </div>
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
+            {(data.mensagens as { id: string; direcao: string; corpo: string | null; criado_em: string }[]).length === 0 && (
+              <p className="text-sm text-muted-foreground">Nenhuma mensagem vinculada a este contato.</p>
+            )}
+            {(data.mensagens as { id: string; direcao: string; corpo: string | null; criado_em: string }[]).map((m) => (
+              <div
+                key={m.id}
+                className={`rounded-sm px-3 py-2 text-sm ${
+                  m.direcao === "out" || m.direcao === "saida"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                }`}
+              >
+                <p>{m.corpo ?? "—"}</p>
+                <p className="mt-1 text-[10px] opacity-70">{fmtDateTime(m.criado_em)}</p>
+              </div>
+            ))}
+          </div>
+        </aside>
       </div>
 
       <EditarOportunidadeDialog

@@ -41,13 +41,16 @@ import {
   type DadosMudancaEtapa,
 } from "@/components/oportunidades/MudancaEtapaDialog";
 
-type Etapa = { id: string; nome: string; cor: string | null; ordem: number; tipo: string | null };
+type Etapa = { id: string; nome: string; cor: string | null; ordem: number; tipo: string | null; funil_id?: string | null };
 type Oportunidade = {
   id: string;
   titulo: string | null;
   interesse: string | null;
+  origem?: string | null;
+  valor?: number | null;
   etapa_id: string | null;
-  contato: { id: string; nome: string } | null;
+  funil_id?: string | null;
+  contato: { id: string; nome: string; telefone?: string | null } | null;
 };
 
 function Card({
@@ -92,8 +95,11 @@ function Card({
         {o.contato?.nome && o.titulo && (
           <div className="truncate text-xs text-muted-foreground">{o.contato.nome}</div>
         )}
-        <div className="mt-2 text-xs text-muted-foreground">
-          <span>{o.interesse ?? "—"}</span>
+        {o.contato?.telefone && (
+          <div className="mt-1 truncate text-xs text-primary">{o.contato.telefone}</div>
+        )}
+        <div className="mt-2 text-[11px] text-muted-foreground">
+          {o.origem ? `Origem: ${o.origem}` : o.interesse ?? "—"}
         </div>
       </Link>
     </div>
@@ -113,7 +119,7 @@ function Coluna({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-72 flex-shrink-0 flex-col rounded-xl border border-border bg-muted/30 ${
+      className={`flex w-72 flex-shrink-0 flex-col rounded-sm border border-border bg-muted/30 ${
         isOver ? "ring-2 ring-primary/40" : ""
       }`}
     >
@@ -125,20 +131,31 @@ function Coluna({
             {opps.length}
           </span>
         </div>
+        <span className="text-[10px] tabular-nums text-muted-foreground">
+          {opps.reduce((s, o) => s + Number(o.valor ?? 0), 0)
+            ? `R$ ${opps.reduce((s, o) => s + Number(o.valor ?? 0), 0).toLocaleString("pt-BR")}`
+            : "R$ 0"}
+        </span>
       </div>
       <div className="flex max-h-[calc(100vh-260px)] flex-col gap-2 overflow-y-auto p-3">
         {opps.map((o) => (
           <Card key={o.id} o={o} ids={opps.map((x) => x.id)} onRemove={onRemove} />
         ))}
         {opps.length === 0 && (
-          <p className="py-4 text-center text-xs text-muted-foreground">Vazio</p>
+          <div className="min-h-[7rem] rounded-sm border border-dashed border-border/80 bg-background/40" />
         )}
       </div>
     </div>
   );
 }
 
-export function KanbanView({ filters = FILTROS_VAZIOS }: { filters?: OportunidadeFilters } = {}) {
+export function KanbanView({
+  filters = FILTROS_VAZIOS,
+  funilId = null,
+}: {
+  filters?: OportunidadeFilters;
+  funilId?: string | null;
+} = {}) {
   const qc = useQueryClient();
   const { isAdmin } = useAuth();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -159,7 +176,7 @@ export function KanbanView({ filters = FILTROS_VAZIOS }: { filters?: Oportunidad
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["oportunidades", "kanban", filters],
+    queryKey: ["oportunidades", "kanban", filters, funilId],
     queryFn: async () => {
       // Kanban precisa do estado COMPLETO (filtrado) para o DnD funcionar.
       // PostgREST default max-rows=1000 trunca queries grandes — então paginamos manualmente.
@@ -170,7 +187,7 @@ export function KanbanView({ filters = FILTROS_VAZIOS }: { filters?: Oportunidad
       while (true) {
         let query = supabase
           .from("oportunidades")
-          .select("id, titulo, interesse, etapa_id, contato:contatos(id, nome)")
+          .select("id, titulo, interesse, origem, valor, etapa_id, funil_id, contato:contatos(id, nome, telefone)")
           .order("criado_em", { ascending: false })
           .range(offset, offset + PAGE - 1);
         query = applyOportunidadeFiltros(query, filters, contatoIds);
@@ -181,10 +198,19 @@ export function KanbanView({ filters = FILTROS_VAZIOS }: { filters?: Oportunidad
         if (data.length < PAGE) break;
         offset += PAGE;
       }
-      const { data: etapas } = await supabase.from("etapas").select("*").order("ordem");
+      let etapasQ = supabase.from("etapas").select("*").order("ordem");
+      if (funilId) etapasQ = etapasQ.eq("funil_id", funilId);
+      const { data: etapas, error: etapasErr } = await etapasQ;
+      const etapasOk = (!etapasErr ? etapas : (await supabase.from("etapas").select("*").order("ordem")).data) ?? [];
+      const etapaIds = new Set(etapasOk.map((e: Etapa) => e.id));
+      const oppsFunil = funilId
+        ? (opps as Oportunidade[]).filter(
+            (o) => o.funil_id === funilId || (!o.funil_id && etapaIds.has(o.etapa_id ?? "")),
+          )
+        : (opps as Oportunidade[]);
       return {
-        etapas: (etapas ?? []) as Etapa[],
-        opps: opps as Oportunidade[],
+        etapas: etapasOk as Etapa[],
+        opps: oppsFunil,
       };
     },
   });

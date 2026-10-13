@@ -84,7 +84,7 @@ export function PergunteAoCrm({
           <button
             key={a}
             type="button"
-            className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+            className="rounded-sm border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground"
             onClick={() => {
               setPergunta(a);
               void enviar(a);

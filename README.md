@@ -1,6 +1,8 @@
-# Sistema CRM
+# VORTEX — CRM
 
 Blueprint **white-label** de CRM comercial B2B: funil de vendas + WhatsApp + tarefas + calendário.
+
+Visual de referência: **Manual VORTEX** (Void, Graphite, Bone, Violet só como acento, Michroma + Inter, símbolo V). No fork do cliente, troque `src/lib/brand.ts`, `src/components/branding/Logos.tsx` e os tokens em `src/index.css`.
 
 Não é ERP de pedidos/delivery. Fork/clone por contrato, renomeie a marca, aponte Supabase/WAHA/Chatwoot e **troque segmentos/pipeline pelos do cliente**. A demonstração usa só placeholders (`Empresa exemplo A`) — não é um CRM de um nicho.
 
@@ -94,6 +96,7 @@ npx supabase functions deploy sdr-handoff --no-verify-jwt
 npx supabase functions deploy sdr-pausar --no-verify-jwt
 npx supabase functions deploy crm-ia
 npx supabase functions deploy crm-ia-eventos --no-verify-jwt
+npx supabase functions deploy indicadores-ads --no-verify-jwt
 ```
 
 > `--no-verify-jwt` em `leads` / `lp-intake` permite chamadas anônimas do site. A função valida o payload.
@@ -204,6 +207,38 @@ Campos padrão (todos opcionais exceto `nome`):
 ```
 
 Captação em código: `lp-intake` (site) e `meta-leads` (Lead Ads), reusando `_shared/criarLead.ts`. Cada submissão vai para `entradas_log`.
+
+### Plataforma de indicadores (Meta Ads + Google Ads)
+
+A aba **Indicadores** (`/indicadores`) cruza o funil deste tenant com um snapshot de mídia. A plataforma de indicadores **empurra** gasto/cliques; o CRM **devolve** leads e ganhos reais da origem `meta_ads` / `google_ads`.
+
+```bash
+npx supabase secrets set INDICADORES_ADS_SECRET=…
+npx supabase functions deploy indicadores-ads --no-verify-jwt
+```
+
+POST (plataforma → CRM):
+
+```json
+{
+  "plataforma": "meta_ads",
+  "periodo_inicio": "2026-10-07",
+  "periodo_fim": "2026-10-13",
+  "conta_nome": "Conta Meta",
+  "investimento": 3850,
+  "impressoes": 142000,
+  "cliques": 1980,
+  "ctr": 1.39,
+  "cpc": 1.94,
+  "cpl": 38.5,
+  "campanhas": [
+    { "campanha_nome": "Leads B2B", "investimento": 2400, "cliques": 1260, "leads": 67, "cpl": 36 }
+  ]
+}
+```
+
+`POST /functions/v1/indicadores-ads?secret=…` — também aceita `google_ads`.  
+`GET` no mesmo endpoint devolve `{ crm, ads }` para a plataforma calcular CPL/ROAS com a verdade do funil.
 
 ## Agenda (Google Calendar → CRM)
 

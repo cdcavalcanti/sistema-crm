@@ -383,7 +383,7 @@ export default function Assistente() {
                 ))}
               </div>
             )}
-            <div className="flex items-end gap-2 rounded-2xl border border-border bg-background p-2">
+            <div className="flex items-end gap-2 rounded-sm border border-border bg-background p-2">
               <input
                 ref={fileRef}
                 type="file"

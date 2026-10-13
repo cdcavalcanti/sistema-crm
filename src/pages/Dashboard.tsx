@@ -53,12 +53,12 @@ function StatCard({
       <div className="relative flex items-start justify-between">
         <div className="space-y-1">
           <span className="page-eyebrow">{title}</span>
-          <div className="font-display text-4xl font-semibold tracking-tight text-foreground">
+          <div className="text-4xl font-medium tabular-nums tracking-tight text-foreground">
             {loading ? <span className="text-muted-foreground/50">—</span> : value}
           </div>
           {hint && <div className="text-xs text-muted-foreground">{hint}</div>}
         </div>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-secondary ring-1 ${ring}`}>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-sm bg-secondary ring-1 ${ring}`}>
           <Icon className="h-4 w-4" />
         </div>
       </div>
@@ -123,7 +123,7 @@ function OnboardingChecklist({
   if (dismissed || feitos === steps.length) return null;
 
   return (
-    <div className="surface-card relative overflow-hidden border border-primary/15 bg-gradient-to-br from-secondary/40 to-background p-6">
+    <div className="surface-card relative overflow-hidden p-6">
       <button
         type="button"
         className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -136,7 +136,7 @@ function OnboardingChecklist({
         <X className="h-4 w-4" />
       </button>
       <p className="page-eyebrow">Primeiro dia</p>
-      <h2 className="mt-1 font-display text-xl font-semibold">
+      <h2 className="mt-1 text-xl font-medium">
         Deixe o CRM pronto em 4 passos
       </h2>
       <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
@@ -298,9 +298,7 @@ export default function Dashboard() {
           })}
         </p>
         <div className="flex items-end justify-between gap-4">
-          <h1 className="page-title text-4xl">
-            <span className="text-gradient-brand">Sistema CRM</span>
-          </h1>
+          <h1 className="page-title">VORTEX</h1>
           <Link
             to="/oportunidades?view=kanban"
             className="hidden items-center gap-1.5 text-sm font-medium text-primary hover:underline md:inline-flex"
@@ -404,7 +402,7 @@ export default function Dashboard() {
           <div className="mb-5 flex items-end justify-between">
             <div>
               <p className="page-eyebrow">Funil</p>
-              <h2 className="mt-1 font-display text-xl font-semibold">Distribuição por etapa</h2>
+              <h2 className="mt-1 text-xl font-medium">Distribuição por etapa</h2>
             </div>
             <Link to="/oportunidades?view=kanban" className="text-xs font-medium text-primary hover:underline">
               Ver kanban
@@ -455,7 +453,7 @@ export default function Dashboard() {
             <div className="mb-3 flex items-end justify-between">
               <div>
                 <p className="page-eyebrow">Agenda</p>
-                <h2 className="mt-1 font-display text-lg font-semibold">Próximas demos</h2>
+                <h2 className="mt-1 text-lg font-medium">Próximas demos</h2>
               </div>
               <Link to="/calendario" className="text-xs font-medium text-primary hover:underline">
                 Calendário
@@ -490,7 +488,7 @@ export default function Dashboard() {
               </Link>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="font-display text-3xl font-semibold">
+              <span className="text-3xl font-medium tabular-nums">
                 {data?.tarefasAbertas ?? 0}
               </span>
               <span className="text-xs text-muted-foreground">aguardando ação</span>
@@ -503,7 +501,7 @@ export default function Dashboard() {
         <div className="mb-5 flex items-end justify-between">
           <div>
             <p className="page-eyebrow">Pipeline</p>
-            <h2 className="mt-1 font-display text-xl font-semibold">Últimos leads</h2>
+            <h2 className="mt-1 text-xl font-medium">Últimos leads</h2>
           </div>
           <Link to="/oportunidades" className="text-xs font-medium text-primary hover:underline">
             Ver todas

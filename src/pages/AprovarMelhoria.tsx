@@ -60,7 +60,7 @@ export default function AprovarMelhoria() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
+      <div className="surface-elevated w-full max-w-md p-8 text-center">
         {carregando && <Loader2 className="mx-auto h-8 w-8 animate-spin text-slate-400" />}
 
         {!carregando && erro && !info && (
@@ -82,7 +82,7 @@ export default function AprovarMelhoria() {
             ) : (
               <>
                 <div className="text-4xl">{ehBacklog ? "📋" : "✅"}</div>
-                <p className="mt-2 text-xs font-medium uppercase tracking-wide text-slate-400">Sistema CRM</p>
+                <p className="mt-2 text-xs font-medium uppercase tracking-[0.32em] text-slate-400">VORTEX</p>
                 <h1 className="mt-1 text-lg font-semibold">
                   {ehBacklog ? "Adicionar ao backlog?" : "Aprovar e publicar?"}
                 </h1>

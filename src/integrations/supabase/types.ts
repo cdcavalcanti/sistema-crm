@@ -12,6 +12,24 @@ export type Json =
 
 export type AppRole = "super_admin" | "admin" | "usuario";
 
+type Tab<R> = {
+  Row: R;
+  Insert: Partial<R> & { titulo: string };
+  Update: Partial<R>;
+};
+
+type VinculadoCrm = {
+  id: string;
+  titulo: string;
+  status: string;
+  contato_id: string | null;
+  oportunidade_id: string | null;
+  responsavel: string | null;
+  notas: string | null;
+  criado_em: string;
+  atualizado_em: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -44,10 +62,35 @@ export type Database = {
         Insert: { user_id: string; role: AppRole };
         Update: { role?: AppRole };
       };
+      funis: {
+        Row: { id: string; nome: string; slug: string; cor: string | null; ordem: number; tipo: string; criado_em: string };
+        Insert: Partial<Database["public"]["Tables"]["funis"]["Row"]> & { nome: string; slug: string };
+        Update: Partial<Database["public"]["Tables"]["funis"]["Row"]>;
+      };
       etapas: {
-        Row: { id: string; nome: string; ordem: number; cor: string | null; tipo: string | null; criado_em: string };
-        Insert: { nome: string; ordem: number; cor?: string | null; tipo?: string | null };
-        Update: { nome?: string; ordem?: number; cor?: string | null; tipo?: string | null };
+        Row: { id: string; nome: string; ordem: number; cor: string | null; tipo: string | null; funil_id: string | null; criado_em: string };
+        Insert: { nome: string; ordem: number; cor?: string | null; tipo?: string | null; funil_id?: string | null };
+        Update: { nome?: string; ordem?: number; cor?: string | null; tipo?: string | null; funil_id?: string | null };
+      };
+      empresas: {
+        Row: {
+          id: string;
+          nome: string;
+          cnpj: string | null;
+          tamanho: string | null;
+          faturamento_mensal: number | null;
+          atividade_principal: string | null;
+          atividade_secundaria: string | null;
+          site: string | null;
+          instagram: string | null;
+          linkedin: string | null;
+          situacao_cadastral: string | null;
+          notas: string | null;
+          criado_em: string;
+          atualizado_em: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["empresas"]["Row"]> & { nome: string };
+        Update: Partial<Database["public"]["Tables"]["empresas"]["Row"]>;
       };
       contatos: {
         Row: {
@@ -56,6 +99,8 @@ export type Database = {
           email: string | null;
           telefone: string | null;
           nome_estabelecimento: string | null;
+          empresa_id: string | null;
+          cargo: string | null;
           anos_operacao: number | null;
           segmento: string | null;
           observacoes: string | null;
@@ -71,6 +116,8 @@ export type Database = {
         Row: {
           id: string;
           contato_id: string;
+          empresa_id: string | null;
+          funil_id: string | null;
           titulo: string | null;
           interesse: string | null;
           nome_estabelecimento: string | null;
@@ -78,6 +125,9 @@ export type Database = {
           descricao: string | null;
           origem: string;
           etapa_id: string | null;
+          cargo_contato: string | null;
+          dor_cliente: string | null;
+          impacto_negocio: string | null;
           valor: number | null;
           data_visita: string | null;
           data_fechamento: string | null;
@@ -343,6 +393,74 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["ia_propostas"]["Row"]>;
       };
+      pedidos: Tab<VinculadoCrm & { valor: number | null; orcamento_id: string | null }>;
+      orcamentos: Tab<VinculadoCrm & { valor: number | null; validade: string | null }>;
+      propostas: Tab<VinculadoCrm & { valor: number | null; validade: string | null }>;
+      ligacoes: Tab<VinculadoCrm & { direcao: string; duracao_seg: number | null; resultado: string | null }>;
+      nps_respostas: Tab<VinculadoCrm & { score: number | null; canal: string | null }>;
+      diagnosticos: Tab<VinculadoCrm & { indice: number | null; eixo: string | null }>;
+      reuniao_notas: Tab<VinculadoCrm & { data_reuniao: string | null }>;
+      prospeccao: Tab<VinculadoCrm & { origem: string | null; proximo_passo: string | null }>;
+      email_campanhas: Tab<VinculadoCrm & { assunto: string | null }>;
+      planejamento: Tab<VinculadoCrm & { semana_inicio: string | null; meta: string | null }>;
+      campos_personalizados: Tab<{
+        id: string;
+        titulo: string;
+        status: string;
+        entidade: string;
+        chave: string;
+        tipo_campo: string;
+        obrigatorio: boolean;
+        notas: string | null;
+        criado_em: string;
+        atualizado_em: string;
+      }>;
+      indicadores_ads: {
+        Row: {
+          id: string;
+          plataforma: "meta_ads" | "google_ads" | string;
+          periodo_inicio: string;
+          periodo_fim: string;
+          conta_id: string | null;
+          conta_nome: string | null;
+          campanha_id: string | null;
+          campanha_nome: string | null;
+          investimento: number | null;
+          impressoes: number | null;
+          alcance: number | null;
+          cliques: number | null;
+          ctr: number | null;
+          cpc: number | null;
+          cpl: number | null;
+          cpm: number | null;
+          conversoes: number | null;
+          leads_plataforma: number | null;
+          receita_ads: number | null;
+          roas: number | null;
+          fonte: string;
+          payload: Json;
+          coletado_em: string;
+          criado_em: string;
+          atualizado_em: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["indicadores_ads"]["Row"]> & {
+          plataforma: string;
+          periodo_inicio: string;
+          periodo_fim: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["indicadores_ads"]["Row"]>;
+      };
+      automacao_regras: Tab<{
+        id: string;
+        titulo: string;
+        status: string;
+        evento: string;
+        acao: string;
+        ativo: boolean;
+        notas: string | null;
+        criado_em: string;
+        atualizado_em: string;
+      }>;
     };
     Views: Record<string, never>;
     Functions: {
@@ -350,6 +468,7 @@ export type Database = {
       is_admin_or_super: { Args: { _user_id: string }; Returns: boolean };
       meu_responsavel_crm: { Args: Record<string, never>; Returns: string };
       pode_ver_carteira: { Args: { _responsavel: string }; Returns: boolean };
+      crm_modulo_visivel: { Args: { _oportunidade_id: string | null }; Returns: boolean };
       registrar_acesso: { Args: Record<string, never>; Returns: undefined };
       reportar_problema_melhoria: { Args: { _melhoria_id: string }; Returns: undefined };
     };

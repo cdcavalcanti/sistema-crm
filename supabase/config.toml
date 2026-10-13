@@ -44,3 +44,6 @@ verify_jwt = false        # cron (?secret=AGENDA_SYNC_SECRET)
 [functions.crm-ia-eventos]
 verify_jwt = false        # cron (?secret=AGENDA_SYNC_SECRET) — follow-up / esfriou
 
+[functions.indicadores-ads]
+verify_jwt = false        # plataforma de indicadores (POST snapshot / GET funil)
+

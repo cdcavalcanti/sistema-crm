@@ -8,7 +8,7 @@ export const LGPD_VERSAO_PADRAO = "2026-09-19";
 export const LGPD_POLITICA = {
   versao: LGPD_VERSAO_PADRAO,
   atualizadoEm: "19/09/2026",
-  controlador: "Sistema CRM (operador da instância)",
+  controlador: "VORTEX (operador da instância)",
   secoes: [
     {
       titulo: "1. Quem somos",

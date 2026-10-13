@@ -377,6 +377,22 @@ export default function RecursosDev() {
               <code className="rounded bg-muted/60 px-1">META_APP_SECRET</code> (opcional, valida assinatura).
             </p>
           </div>
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Plataforma de indicadores (Meta Ads / Google Ads)
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="rounded bg-primary/10 px-2 py-0.5 font-mono text-xs font-medium text-primary">GET/POST</span>
+              <code className="break-all rounded bg-muted/60 px-2 py-0.5 font-mono text-xs">{`${FUNCTIONS_BASE}/indicadores-ads?secret=INDICADORES_ADS_SECRET`}</code>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              POST empurra o recorte (investimento, cliques, campanhas) para a aba <strong>Indicadores</strong>.
+              GET devolve leads/ganhos das origens <code className="rounded bg-muted/60 px-1">meta_ads</code> e{" "}
+              <code className="rounded bg-muted/60 px-1">google_ads</code> neste tenant. Secret:{" "}
+              <code className="rounded bg-muted/60 px-1">INDICADORES_ADS_SECRET</code> (ou{" "}
+              <code className="rounded bg-muted/60 px-1">AGENDA_SYNC_SECRET</code>).
+            </p>
+          </div>
         </div>
       </section>
 

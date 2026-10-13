@@ -10,6 +10,7 @@ import { CrmLogo } from "@/components/branding/Logos";
 import { Building2, MessageCircle, LineChart } from "lucide-react";
 import { isUiPreview } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { MARCA } from "@/lib/brand";
 
 /** Em produção o CRM é só por convite (admin cria em Usuários). */
 const ALLOW_SIGNUP = import.meta.env.VITE_ALLOW_SIGNUP === "true";
@@ -225,36 +226,29 @@ export default function Auth() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-primary p-12 text-primary-foreground lg:flex">
-        <div className="absolute inset-0 pattern-grid opacity-10" />
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-[hsl(var(--void))] p-12 text-[hsl(var(--silver))] lg:flex">
+        <div className="absolute inset-0 pattern-grid" />
         <div
-          className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full"
+          className="pointer-events-none absolute -right-24 bottom-24 h-72 w-72"
           style={{
             background:
-              "radial-gradient(circle, hsl(var(--brand) / 0.32) 0%, transparent 70%)",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute -bottom-40 -left-32 h-[28rem] w-[28rem] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, hsl(var(--brand-soft) / 0.22) 0%, transparent 70%)",
+              "radial-gradient(circle, hsl(var(--brand) / 0.18) 0%, transparent 70%)",
           }}
         />
 
-        <div className="relative z-10 inline-flex rounded-2xl bg-white px-5 py-3 shadow-elegant">
-          <CrmLogo className="h-16 -my-2" />
+        <div className="relative z-10 [&_.text-foreground]:text-[hsl(var(--silver))] [&_.text-muted-foreground]:text-[hsl(var(--steel))]">
+          <CrmLogo mark="chrome" className="h-14" />
         </div>
 
         <div className="relative z-10 max-w-lg space-y-8">
           <div className="space-y-4">
-            <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-primary-foreground/60">
-              CRM comercial
+            <p className="text-[11px] font-medium uppercase tracking-[0.5em] text-[hsl(var(--steel))]">
+              {MARCA.tagline}
             </p>
-            <h2 className="font-display text-4xl font-semibold leading-[1.05] tracking-tight">
-              Pipeline, WhatsApp e follow-up para vender a empresas e organizações.
+            <h2 className="font-display text-[clamp(1.4rem,3vw,2rem)] leading-[1.45] text-[hsl(var(--silver))]">
+              Operar com IA
             </h2>
-            <p className="text-sm text-primary-foreground/70">
+            <p className="text-sm font-light text-[hsl(var(--steel))]">
               Pipeline, WhatsApp e follow-up no mesmo lugar — do lead frio ao contrato fechado.
             </p>
           </div>
@@ -262,44 +256,39 @@ export default function Auth() {
           <ul className="space-y-3">
             {PILARES.map(({ icon: Icon, titulo: t, desc }) => (
               <li key={t} className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary-foreground/10 ring-1 ring-primary-foreground/15">
-                  <Icon className="h-4 w-4 text-primary-foreground/90" />
+                <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[2px] bg-white/5 ring-1 ring-white/10">
+                  <Icon className="h-4 w-4 text-[hsl(var(--silver))]" />
                 </span>
                 <div className="text-sm">
-                  <div className="font-medium">{t}</div>
-                  <div className="text-primary-foreground/65">{desc}</div>
+                  <div className="font-medium text-[hsl(var(--silver))]">{t}</div>
+                  <div className="font-light text-[hsl(var(--steel))]">{desc}</div>
                 </div>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="relative z-10 text-xs text-primary-foreground/55">
-          © {new Date().getFullYear()} Sistema CRM — Todos os direitos reservados.
+        <div className="relative z-10 text-xs text-[hsl(var(--steel))]">
+          © {new Date().getFullYear()} {MARCA.nome}
         </div>
       </aside>
 
       <section className="relative flex items-center justify-center bg-background px-6 py-16">
         <div className="w-full max-w-md">
           <div className="mb-8 flex items-center lg:hidden">
-            <CrmLogo className="h-14 -my-2" />
+            <CrmLogo mark="mono" className="h-14 text-foreground" />
           </div>
 
           <div className="surface-elevated p-8">
             <div className="mb-7 space-y-2">
               <p className="page-eyebrow">{titulo}</p>
-              <h1 className="font-display text-3xl font-semibold tracking-tight">
+              <h1 className="font-display text-xl sm:text-2xl">
                 {mode === "login" || (ALLOW_SIGNUP && mode === "signup") ? (
-                  <>
-                    {mode === "login" ? "Acesse o " : "Crie sua conta no "}
-                    <span className="text-gradient-brand">
-                      {mode === "login" ? "Sistema CRM" : "CRM"}
-                    </span>
-                  </>
+                  <>{mode === "login" ? `Acesse ${MARCA.nome}` : `Conta ${MARCA.nome}`}</>
                 ) : mode === "forgot" ? (
-                  <>Esqueceu a <span className="text-gradient-brand">senha</span>?</>
+                  <>Esqueceu a senha?</>
                 ) : (
-                  <>Redefinir <span className="text-gradient-brand">senha</span></>
+                  <>Redefinir senha</>
                 )}
               </h1>
               <p className="text-sm text-muted-foreground">{subtitulo}</p>

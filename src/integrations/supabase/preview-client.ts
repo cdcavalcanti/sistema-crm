@@ -15,6 +15,16 @@ const REL: Record<string, Record<string, Rel>> = {
     contatos: { local: "contato_id", table: "contatos", foreign: "id" },
     etapa: { local: "etapa_id", table: "etapas", foreign: "id" },
     etapas: { local: "etapa_id", table: "etapas", foreign: "id" },
+    empresa: { local: "empresa_id", table: "empresas", foreign: "id" },
+    empresas: { local: "empresa_id", table: "empresas", foreign: "id" },
+    funil: { local: "funil_id", table: "funis", foreign: "id" },
+  },
+  etapas: {
+    funil: { local: "funil_id", table: "funis", foreign: "id" },
+  },
+  contatos: {
+    contato_etiquetas: { local: "id", table: "contato_etiquetas", foreign: "contato_id", many: true },
+    empresa: { local: "empresa_id", table: "empresas", foreign: "id" },
   },
   tarefas: {
     contato: { local: "contato_id", table: "contatos", foreign: "id" },
@@ -26,9 +36,6 @@ const REL: Record<string, Record<string, Rel>> = {
     contato: { local: "contato_id", table: "contatos", foreign: "id" },
     contatos: { local: "contato_id", table: "contatos", foreign: "id" },
   },
-  contatos: {
-    contato_etiquetas: { local: "id", table: "contato_etiquetas", foreign: "contato_id", many: true },
-  },
   contato_etiquetas: {
     etiqueta: { local: "etiqueta_id", table: "etiquetas", foreign: "id" },
     etiquetas: { local: "etiqueta_id", table: "etiquetas", foreign: "id" },
@@ -38,6 +45,23 @@ const REL: Record<string, Record<string, Rel>> = {
     oportunidade: { local: "oportunidade_id", table: "oportunidades", foreign: "id" },
   },
 };
+
+const VINCULO_CRM: Rel = { local: "contato_id", table: "contatos", foreign: "id" };
+const VINCULO_OPP: Rel = { local: "oportunidade_id", table: "oportunidades", foreign: "id" };
+for (const t of [
+  "orcamentos",
+  "propostas",
+  "ligacoes",
+  "nps_respostas",
+  "diagnosticos",
+  "reuniao_notas",
+  "prospeccao",
+  "email_campanhas",
+  "planejamento",
+  "pedidos",
+]) {
+  REL[t] = { contato: VINCULO_CRM, contatos: VINCULO_CRM, oportunidade: VINCULO_OPP, oportunidades: VINCULO_OPP };
+}
 
 function splitTop(input: string, sep = ","): string[] {
   const out: string[] = [];

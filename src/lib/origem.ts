@@ -3,6 +3,7 @@ export const ORIGENS_DESTAQUE = [
   "WhatsApp",
   "Instagram",
   "Meta Ads",
+  "Google Ads",
   "Formulário do site",
   "Indicação",
 ] as const;
@@ -25,6 +26,7 @@ const ORIGEM_ALIASES: Record<string, (typeof ORIGENS_DESTAQUE)[number] | string>
   whatsapp: "WhatsApp",
   instagram: "Instagram",
   meta_ads: "Meta Ads",
+  google_ads: "Google Ads",
   formulario_site: "Formulário do site",
   indicacao: "Indicação",
 };

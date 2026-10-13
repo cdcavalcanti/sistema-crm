@@ -38,7 +38,7 @@ import {
 } from "@/lib/oportunidades-filtros";
 import { exportarOportunidadesXlsx } from "@/lib/exportar-oportunidades";
 
-const COLORS = ["#3b82f6", "#06b6d4", "#8b5cf6", "#a855f7", "#f97316", "#eab308", "#14b8a6", "#0ea5e9", "#10b981", "#ef4444"];
+const COLORS = ["#6D4CFF", "#8C8C99", "#15151B", "#A18BFF", "#D5D5DD", "#07070A", "#14b8a6", "#0ea5e9", "#10b981", "#ef4444"];
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (

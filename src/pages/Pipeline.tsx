@@ -32,14 +32,25 @@ const TIPOS = [
   { value: "perdido", label: "Perdido" },
 ];
 
-type Etapa = { id: string; nome: string; ordem: number; cor: string | null; tipo: string | null };
+type Etapa = { id: string; nome: string; ordem: number; cor: string | null; tipo: string | null; funil_id?: string | null };
+type Funil = { id: string; nome: string; slug: string };
 
 export default function Pipeline() {
   const qc = useQueryClient();
   const [novoNome, setNovoNome] = useState("");
   const [novoTipo, setNovoTipo] = useState("andamento");
   const [novaCor, setNovaCor] = useState("#3b82f6");
+  const [novoFunil, setNovoFunil] = useState("");
   const [removendo, setRemovendo] = useState<Etapa | null>(null);
+
+  const { data: funis = [] } = useQuery({
+    queryKey: ["funis"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("funis").select("id, nome, slug").order("ordem");
+      if (error) return [];
+      return (data ?? []) as Funil[];
+    },
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["etapas"],
@@ -58,7 +69,13 @@ export default function Pipeline() {
       const proximaOrdem = (data?.length ?? 0) + 1;
       const { error } = await supabase
         .from("etapas")
-        .insert({ nome: novoNome, cor: novaCor, ordem: proximaOrdem, tipo: novoTipo });
+        .insert({
+          nome: novoNome,
+          cor: novaCor,
+          ordem: proximaOrdem,
+          tipo: novoTipo,
+          funil_id: novoFunil || funis[0]?.id || null,
+        });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -110,7 +127,7 @@ export default function Pipeline() {
       <header>
         <p className="page-eyebrow">Administração</p>
         <h1 className="page-title">Pipeline</h1>
-        <p className="page-subtitle">Configure as etapas que aparecem no kanban e nos relatórios.</p>
+        <p className="page-subtitle">Etapas por funil — Comercial, NPS/CS e Diagnóstico neste tenant.</p>
       </header>
 
       <div className="surface-card space-y-4 p-6">
@@ -121,7 +138,7 @@ export default function Pipeline() {
             if (!novoNome.trim()) return;
             criar.mutate();
           }}
-          className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_140px_180px_auto] sm:items-end"
+          className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_140px_180px_180px_auto] sm:items-end"
         >
           <div className="space-y-1.5">
             <Label>Nome</Label>
@@ -146,6 +163,23 @@ export default function Pipeline() {
               </SelectContent>
             </Select>
           </div>
+          {funis.length > 0 && (
+            <div className="space-y-1.5">
+              <Label>Funil</Label>
+              <Select value={novoFunil} onValueChange={setNovoFunil}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Funil" />
+                </SelectTrigger>
+                <SelectContent>
+                  {funis.map((f) => (
+                    <SelectItem key={f.id} value={f.id}>
+                      {f.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <Button type="submit" disabled={criar.isPending}>
             <Plus className="mr-2 h-4 w-4" />
             Criar
@@ -158,6 +192,11 @@ export default function Pipeline() {
         {(data ?? []).map((e, idx) => (
           <div key={e.id} className="flex items-center gap-3 p-4">
             <span className="font-mono text-xs text-muted-foreground">#{idx + 1}</span>
+            {funis.length > 0 && (
+              <span className="w-28 truncate text-[10px] uppercase tracking-wide text-muted-foreground">
+                {funis.find((f) => f.id === e.funil_id)?.nome ?? "—"}
+              </span>
+            )}
             <Input
               type="color"
               value={e.cor ?? "#888"}
