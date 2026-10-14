@@ -1,0 +1,7 @@
+# Bun no dia a dia (ex.: Lucas). CI e Docker continuam no npm + package-lock.json.
+[install]
+exact = true
+
+[install.lockfile]
+# Não gerar bun.lock no repo — a fonte da verdade das versões é o package-lock.json.
+save = false

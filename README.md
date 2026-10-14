@@ -2,19 +2,38 @@
 
 Blueprint **white-label** de CRM comercial B2B: funil de vendas + WhatsApp + tarefas + calendário.
 
-Visual de referência: **Manual VORTEX** (Void, Graphite, Bone, Violet só como acento, Michroma + Inter, símbolo V). No fork do cliente, troque `src/lib/brand.ts`, `src/components/branding/Logos.tsx` e os tokens em `src/index.css`.
+Visual de referência: **Manual VORTEX** (Void, Graphite, Bone, Violet só como acento, Michroma + Inter, símbolo V). No fork do cliente, troque `frontend/src/lib/brand.ts`, `frontend/src/components/branding/Logos.tsx` e os tokens em `frontend/src/index.css`.
 
-Não é ERP de pedidos/delivery. Fork/clone por contrato, renomeie a marca, aponte Supabase/WAHA/Chatwoot e **troque segmentos/pipeline pelos do cliente**. A demonstração usa só placeholders (`Empresa exemplo A`) — não é um CRM de um nicho.
+Não é ERP de pedidos/delivery. Fork/clone por contrato, renomeie a marca, aponte o backend Nest + WAHA/Chatwoot e **troque segmentos/pipeline pelos do cliente**. A demonstração usa só placeholders (`Empresa exemplo A`) — não é um CRM de um nicho.
 
 Este repositório é o **template**. Instâncias de produto (CRM de um cliente) nascem a partir daqui — não misture commits com o produto de um cliente. Um CRM seu, para acompanhar os contratos que você fecha, é outro fork.
+
+## Pastas
+
+```
+frontend/   Vite + React (UI)
+backend/    Nest.js + Prisma + Postgres (API)
+```
 
 ## Stack
 
 - **Frontend**: Vite + React 18 + TypeScript + shadcn/ui + Tailwind + TanStack Query
-- **Backend**: Supabase (Postgres + RLS + Edge Functions em Deno)
+- **Backend**: Nest.js 11 (TypeScript) — módulos por domínio, JWT invite-only, Prisma
+- **Banco**: PostgreSQL 16
 - **Charts**: Recharts
 - **Kanban**: @dnd-kit
-- **Calendar**: Google Calendar API (OAuth 2.0)
+
+O Nest.js casa com o CRM: o mesmo TypeScript do front, um módulo por área (identidade, funil, ingest) e guards de papel (`super_admin` / `admin` / `usuario`) no lugar do RLS no browser.
+
+Camadas no `backend/src`:
+
+- `core/` — config, Prisma, JWT, filtros
+- `modules/identity` — login, convite, papéis
+- `modules/crm` — query autenticada das tabelas do CRM + carteira
+- `modules/ingest` — webhooks públicos (leads, ads)
+- `modules/functions` — aliases das antigas edge functions
+
+O legado `backend/supabase/` (SQL + Deno) fica como referência até as integrações de WhatsApp/Google serem portadas por completo.
 
 ## O que vem pronto
 
@@ -23,7 +42,7 @@ Este repositório é o **template**. Instâncias de produto (CRM de um cliente) 
 - Chat WhatsApp (WAHA) + templates/disparos Meta (Chatwoot Cloud)
 - Remarketing, dashboard (KPIs da manhã + onboarding do 1º dia)
 - IA no tenant logado: **Pergunte ao CRM** (leitura com citação) na ficha e no funil; **ação na ficha** só grava depois de confirmar; persona em `/admin/ia`. Gateway = o mesmo `OPENAI_API_KEY` do assistente. Cron `crm-ia-eventos` cria follow-up (sem enviar mensagem).
-- Carteira `profiles.responsavel_crm` + RLS
+- Carteira `profiles.responsavel_crm` (filtro no Nest; admins vêem tudo)
 - Saúde/auditoria (WhatsApp + disparos + demais checks)
 - Usuários/roles, logs, pipeline admin
 - Webhooks de leads / `lp-intake` (aliases de campos)
@@ -38,117 +57,95 @@ Arquitetura de canais:
 ## Como adaptar para um cliente
 
 1. Clone este repo para `sistema-crm-<cliente>` (privado).
-2. Troque logo (`src/components/branding/Logos.tsx`), cores (`src/index.css`) e nome do produto (sidebar, `index.html`, Auth).
-3. Crie um **projeto Supabase novo** e aplique as migrations.
-4. Preencha `.env.local` a partir de `.env.example` (sem copiar secrets de outro cliente).
-5. Ajuste `SEGMENTOS_CRM`, `ETAPAS_CRM`, `PORTES_CRM` e `RESPONSAVEIS_CRM` em `src/lib/constants.ts` (e o seed em `supabase/migrations/20260517_0001_init.sql` se ainda não aplicou).
-6. Deploy das edge functions + secrets (WAHA, Chatwoot, Google, Meta, SDR).
-7. Desligue signups no Dashboard Supabase (`Authentication → Email → Enable Signups` off).
-8. Convide usuários e preencha `responsavel_crm`.
-9. Conecte WhatsApp e teste um template oficial.
-10. Aponte webhooks do site/Meta para `lp-intake` / `meta-leads` / `leads`.
+2. Troque logo (`frontend/src/components/branding/Logos.tsx`), cores (`frontend/src/index.css`) e nome do produto (sidebar, `index.html`, Auth).
+3. Suba Postgres + Nest (`docker compose up --build`) ou aponte `DATABASE_URL` para o Postgres do cliente.
+4. Preencha `backend/.env` e `frontend/.env.local` a partir dos `.env.example` (sem copiar secrets de outro cliente).
+5. Ajuste `SEGMENTOS_CRM`, `ETAPAS_CRM`, `PORTES_CRM` e `RESPONSAVEIS_CRM` em `frontend/src/lib/constants.ts`.
+6. O primeiro super_admin nasce de `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD` se a tabela `users` estiver vazia.
+7. Convide o restante em `/admin/usuarios` e preencha `responsavel_crm`.
+8. Aponte webhooks do site/Meta para `POST /api/v1/ingest/leads` e `POST /api/v1/ingest/indicadores-ads`.
 
-Preview de UI sem backend: no `npm run dev` sem Supabase, o login mostra **Demonstração (sem dados reais)** (placeholders só no navegador). Força com `VITE_UI_PREVIEW=true`. **Nunca** ligue isso em produção. Usuário: `preview@crm.local`.
+Preview de UI sem backend: no `npm run dev` na pasta `frontend` sem `VITE_API_URL`, o login mostra **Demonstração (sem dados reais)**. Força com `VITE_UI_PREVIEW=true`. **Nunca** ligue isso em produção. Usuário: `preview@crm.local`.
 
 ## Setup inicial
 
 ### 1. Dependências
 
+**npm** (CI, Docker e o restante do time):
+
 ```bash
-npm install
+npm install --prefix backend
+npm install --prefix frontend
 ```
+
+**Bun** (quem já usa Bun no dia a dia, ex. Lucas):
+
+```bash
+bun run bun:install
+```
+
+Os scripts `vite`, `nest` e `prisma` são os mesmos. O Bun só instala e dispara; o lockfile que vale no GitHub é o `package-lock.json`. Não commitar `bun.lock`.
+
+| tarefa | npm | Bun |
+| --- | --- | --- |
+| Instalar | `npm install --prefix frontend` (e `backend`) | `bun run bun:install` |
+| Front | `npm run dev:frontend` | `bun run bun:dev` |
+| API | `npm run dev:backend` | `bun run bun:backend` |
+| Prisma | `npx prisma migrate deploy` | `bunx prisma migrate deploy` |
+
+`docker compose` e o CI continuam em **npm** — não precisa o Lucas ter npm no laptop, nem o resto do time ter Bun.
 
 ### 2. Variáveis de ambiente
 
-Copie `.env.example` → `.env.local`. Nunca commite `.env.local`.
+- Backend: `backend/.env.example` → `backend/.env`
+- Frontend: `frontend/.env.example` → `frontend/.env.local` (para falar com o Nest: `VITE_API_URL=/api/v1` e `VITE_USE_API=true`)
 
-### 3. Rodar migrations no Supabase
+Nunca commite `.env` / `.env.local`.
 
-A migration inicial está em `supabase/migrations/20260517_0001_init.sql`.
-
-**A) Via SQL Editor do dashboard Supabase** (mais simples para projeto novo):
-1. Abra o SQL Editor do seu projeto
-2. Cole o conteúdo do arquivo e execute (depois as demais migrations em ordem).
-
-**B) Via Supabase CLI**:
-```bash
-npx supabase link --project-ref <SEU_PROJECT_REF>
-npx supabase db push
-```
-
-Em `supabase/config.toml`, substitua `YOUR_PROJECT_REF` pelo projeto do cliente.
-
-### 4. Deploy das edge functions
+### 3. Banco + API
 
 ```bash
-npx supabase functions deploy leads --no-verify-jwt
-npx supabase functions deploy lp-intake --no-verify-jwt
-npx supabase functions deploy meta-leads --no-verify-jwt
-npx supabase functions deploy create-user
-npx supabase functions deploy update-user-role
-npx supabase functions deploy google-calendar-sync --no-verify-jwt
-npx supabase functions deploy agenda-sync --no-verify-jwt
-npx supabase functions deploy whatsapp-webhook --no-verify-jwt
-npx supabase functions deploy whatsapp-send
-npx supabase functions deploy whatsapp-templates
-npx supabase functions deploy whatsapp-send-template
-npx supabase functions deploy sdr-handoff --no-verify-jwt
-npx supabase functions deploy sdr-pausar --no-verify-jwt
-npx supabase functions deploy crm-ia
-npx supabase functions deploy crm-ia-eventos --no-verify-jwt
-npx supabase functions deploy indicadores-ads --no-verify-jwt
+docker compose up db -d
+cd backend
+npx prisma migrate deploy
+npx prisma db seed
+npm run start:dev
 ```
 
-> `--no-verify-jwt` em `leads` / `lp-intake` permite chamadas anônimas do site. A função valida o payload.
-> `--no-verify-jwt` em `google-calendar-sync` é necessário para o callback do Google.
-> `--no-verify-jwt` em `whatsapp-webhook` permite o POST da WAHA; a função valida `?secret=`.
+API: `http://localhost:3000/api/v1/health`
 
-Secrets:
+### 4. Frontend
 
 ```bash
-npx supabase secrets set GOOGLE_CLIENT_ID=… GOOGLE_CLIENT_SECRET=… GOOGLE_REDIRECT_URI=…
-npx supabase secrets set WAHA_URL=… WAHA_API_KEY=… WAHA_SESSION=… WHATSAPP_WEBHOOK_SECRET=…
-npx supabase secrets set CHATWOOT_URL=… CHATWOOT_ACCOUNT_ID=… CHATWOOT_TOKEN=…
-npx supabase secrets set AGENDA_SYNC_SECRET=… AGENDA_CALENDAR_ID=agenda@empresa.example.com
-```
-
-(`SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` já são injetadas pelo Supabase.)
-
-### 5. Redirect URI no Google Cloud
-
-Authorized redirect URIs:
-
-```
-https://<SEU_PROJECT_REF>.supabase.co/functions/v1/google-calendar-sync/callback
-```
-
-### 6. Subir o frontend
-
-```bash
+cd frontend
+# .env.local com VITE_API_URL=/api/v1 e VITE_USE_API=true
 npm run dev
 ```
 
-### 7. Primeiro super_admin (bootstrap)
+Ou tudo junto:
 
-O signup público está off — `/auth` só permite login. Para o primeiro usuário:
-
-1. Crie o usuário no Supabase Dashboard (`Authentication → Users → Add user`, Auto Confirm).
-2. Promova no SQL Editor:
-
-```sql
-insert into public.user_roles (user_id, role)
-select id, 'super_admin' from auth.users where email = 'voce@empresa.com';
+```bash
+docker compose up --build
 ```
 
-3. Desligue signups públicos: `Authentication → Providers → Email → desmarcar "Enable Signups"`.
+UI em `http://localhost:8080`. Login = `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`.
 
-Daí em diante, novos usuários saem de `/admin/usuarios`.
+### 5. Edge functions legadas (opcional, WhatsApp/Google ainda no Deno)
+
+As funções antigas estão em `backend/supabase/functions`. Enquanto não forem portadas para Nest:
+
+```bash
+npx supabase functions deploy leads --no-verify-jwt
+```
+
+O primeiro usuário é o bootstrap do Nest (`BOOTSTRAP_ADMIN_*`). Depois, convites saem de `/admin/usuarios`.
 
 ## Endpoints públicos (webhooks)
 
 ```
-POST https://<SEU_PROJECT_REF>.supabase.co/functions/v1/leads
+POST https://seu-crm.example.com/api/v1/ingest/leads
 Content-Type: application/json
+# opcional: ?secret= ou header x-ingest-secret
 ```
 
 Campos padrão (todos opcionais exceto `nome`):

@@ -1,20 +1,60 @@
-# Sistema CRM — frontend (Vite build + nginx)
+# VORTEX CRM — frontend (nginx) + backend (Nest) + Postgres
 #
-# Uso:
 #   docker compose up --build
-#   # ou
-#   docker build --build-arg VITE_SUPABASE_URL=... --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=... -t sistema-crm .
-#
-# Backend (Supabase / WAHA / Chatwoot) continua externo — não sobe neste compose.
+#   UI: http://localhost:8080
+#   API: http://localhost:3000/api/v1/health
 
 services:
-  crm:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vortex
+      POSTGRES_PASSWORD: vortex
+      POSTGRES_DB: vortex_crm
+    volumes:
+      - vortex_pg:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vortex -d vortex_crm"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql://vortex:vortex@db:5432/vortex_crm
+      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao}
+      JWT_EXPIRES_IN: 7d
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-voce@empresa.com}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-troque-esta-senha}
+      BOOTSTRAP_ADMIN_NOME: ${BOOTSTRAP_ADMIN_NOME:-Admin}
+      ALLOW_SIGNUP: ${ALLOW_SIGNUP:-false}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      INGEST_LEADS_SECRET: ${INGEST_LEADS_SECRET:-}
+      INDICADORES_ADS_SECRET: ${INDICADORES_ADS_SECRET:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-3000}:3000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
       args:
-        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
-        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY:-}
+        VITE_API_URL: /api/v1
+        VITE_USE_API: "true"
     ports:
       - "${CRM_PORT:-8080}:80"
+    depends_on:
+      - backend
     restart: unless-stopped
+
+volumes:
+  vortex_pg:

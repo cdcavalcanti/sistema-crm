@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 dist
+bun.lock
+bun.lockb
 dist-ssr
 *.local
 
@@ -35,6 +37,7 @@ dist-ssr
 
 # Artefatos locais do Supabase CLI
 supabase/.temp/
+backend/supabase/.temp/
 
 # secrets locais SDR
 .sdr-*-secret

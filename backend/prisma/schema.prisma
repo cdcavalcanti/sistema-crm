@@ -1,0 +1,759 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppRole {
+  super_admin
+  admin
+  usuario
+
+  @@map("app_role")
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  nome         String?
+  confirmed    Boolean   @default(true)
+  criadoEm     DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  profile      Profile?
+  roles        UserRole[]
+
+  @@map("users")
+}
+
+model Profile {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @unique @map("user_id") @db.Uuid
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nome           String?
+  email          String?
+  responsavelCrm String?   @map("responsavel_crm")
+  lgpdAceiteEm   DateTime? @map("lgpd_aceite_em") @db.Timestamptz(6)
+  criadoEm       DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  ultimoAcesso   DateTime? @map("ultimo_acesso") @db.Timestamptz(6)
+
+  @@map("profiles")
+}
+
+model UserRole {
+  id       String   @id @default(uuid()) @db.Uuid
+  userId   String   @map("user_id") @db.Uuid
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     AppRole
+  criadoEm DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  @@unique([userId, role])
+  @@map("user_roles")
+}
+
+model Funil {
+  id       String   @id @default(uuid()) @db.Uuid
+  nome     String
+  slug     String   @unique
+  cor      String?
+  ordem    Int      @default(0)
+  tipo     String   @default("vendas")
+  criadoEm DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  etapas   Etapa[]
+  opps     Oportunidade[]
+
+  @@map("funis")
+}
+
+model Etapa {
+  id       String   @id @default(uuid()) @db.Uuid
+  nome     String
+  ordem    Int
+  cor      String?
+  tipo     String?  @default("andamento")
+  funilId  String?  @map("funil_id") @db.Uuid
+  funil    Funil?   @relation(fields: [funilId], references: [id], onDelete: SetNull)
+  criadoEm DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  opps     Oportunidade[]
+
+  @@map("etapas")
+}
+
+model Empresa {
+  id                   String    @id @default(uuid()) @db.Uuid
+  nome                 String
+  cnpj                 String?
+  tamanho              String?
+  faturamentoMensal    Float?    @map("faturamento_mensal")
+  atividadePrincipal   String?   @map("atividade_principal")
+  atividadeSecundaria  String?   @map("atividade_secundaria")
+  site                 String?
+  instagram            String?
+  linkedin             String?
+  situacaoCadastral    String?   @map("situacao_cadastral")
+  notas                String?
+  criadoEm             DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm         DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+  contatos             Contato[]
+  oportunidades        Oportunidade[]
+
+  @@map("empresas")
+}
+
+model Contato {
+  id                   String   @id @default(uuid()) @db.Uuid
+  nome                 String
+  email                String?  @unique
+  telefone             String?
+  nomeEstabelecimento  String?  @map("nome_estabelecimento")
+  empresaId            String?  @map("empresa_id") @db.Uuid
+  empresa              Empresa? @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  cargo                String?
+  anosOperacao         Int?     @map("anos_operacao")
+  segmento             String?
+  observacoes          String?
+  observacoesInternas  String?  @map("observacoes_internas")
+  metadados            Json     @default("{}")
+  criadoEm             DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm         DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+  oportunidades        Oportunidade[]
+  tarefas              Tarefa[]
+  comentarios          OportunidadeComentario[]
+  etiquetas            ContatoEtiqueta[]
+  conversas            Conversa[]
+  eventos              CalendarioEvento[]
+
+  @@index([email])
+  @@map("contatos")
+}
+
+model Oportunidade {
+  id                  String    @id @default(uuid()) @db.Uuid
+  contatoId           String    @map("contato_id") @db.Uuid
+  contato             Contato   @relation(fields: [contatoId], references: [id], onDelete: Cascade)
+  empresaId           String?   @map("empresa_id") @db.Uuid
+  empresa             Empresa?  @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  funilId             String?   @map("funil_id") @db.Uuid
+  funil               Funil?    @relation(fields: [funilId], references: [id], onDelete: SetNull)
+  titulo              String?
+  interesse           String?
+  nomeEstabelecimento String?   @map("nome_estabelecimento")
+  anosOperacao        Int?      @map("anos_operacao")
+  descricao           String?
+  origem              String
+  etapaId             String?   @map("etapa_id") @db.Uuid
+  etapa               Etapa?    @relation(fields: [etapaId], references: [id], onDelete: SetNull)
+  cargoContato        String?   @map("cargo_contato")
+  dorCliente          String?   @map("dor_cliente")
+  impactoNegocio      String?   @map("impacto_negocio")
+  valor               Float?
+  dataVisita          DateTime? @map("data_visita") @db.Timestamptz(6)
+  dataFechamento      DateTime? @map("data_fechamento") @db.Timestamptz(6)
+  motivoPerda         String?   @map("motivo_perda")
+  googleEventId       String?   @map("google_event_id")
+  observacoes         String?
+  responsavel         String?
+  metadados           Json      @default("{}")
+  criadoEm            DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm        DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+  comentarios         OportunidadeComentario[]
+  tarefas             Tarefa[]
+  eventos             CalendarioEvento[]
+
+  @@index([etapaId])
+  @@index([contatoId])
+  @@index([criadoEm(sort: Desc)])
+  @@index([origem])
+  @@map("oportunidades")
+}
+
+model OportunidadeComentario {
+  id              String        @id @default(uuid()) @db.Uuid
+  oportunidadeId  String        @map("oportunidade_id") @db.Uuid
+  oportunidade    Oportunidade  @relation(fields: [oportunidadeId], references: [id], onDelete: Cascade)
+  userId          String?       @map("user_id") @db.Uuid
+  autorEmail      String?       @map("autor_email")
+  autorNome       String?       @map("autor_nome")
+  conteudo        String
+  criadoEm        DateTime      @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm    DateTime      @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+  contatoId       String?       @map("contato_id") @db.Uuid
+  contato         Contato?      @relation(fields: [contatoId], references: [id], onDelete: SetNull)
+
+  @@index([oportunidadeId])
+  @@map("oportunidade_comentarios")
+}
+
+model Tarefa {
+  id             String         @id @default(uuid()) @db.Uuid
+  titulo         String
+  descricao      String?
+  status         String         @default("aberta")
+  prioridade     String         @default("media")
+  dueDate        DateTime?      @map("due_date") @db.Timestamptz(6)
+  contatoId      String?        @map("contato_id") @db.Uuid
+  contato        Contato?       @relation(fields: [contatoId], references: [id], onDelete: SetNull)
+  oportunidadeId String?        @map("oportunidade_id") @db.Uuid
+  oportunidade   Oportunidade?  @relation(fields: [oportunidadeId], references: [id], onDelete: SetNull)
+  atribuidoPara  String?        @map("atribuido_para")
+  criadoPor      String?        @map("criado_por") @db.Uuid
+  concluidaEm    DateTime?      @map("concluida_em") @db.Timestamptz(6)
+  criadoEm       DateTime       @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime       @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@index([status])
+  @@index([dueDate])
+  @@map("tarefas")
+}
+
+model CalendarioEvento {
+  id             String         @id @default(uuid()) @db.Uuid
+  googleEventId  String?        @unique @map("google_event_id")
+  titulo         String
+  descricao      String?
+  inicio         DateTime       @db.Timestamptz(6)
+  fim            DateTime       @db.Timestamptz(6)
+  local          String?
+  contatoId      String?        @map("contato_id") @db.Uuid
+  contato        Contato?       @relation(fields: [contatoId], references: [id], onDelete: SetNull)
+  oportunidadeId String?        @map("oportunidade_id") @db.Uuid
+  oportunidade   Oportunidade?  @relation(fields: [oportunidadeId], references: [id], onDelete: SetNull)
+  criadoPor      String?        @map("criado_por") @db.Uuid
+  sincronizadoEm DateTime?      @map("sincronizado_em") @db.Timestamptz(6)
+  criadoEm       DateTime       @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime       @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@index([inicio])
+  @@map("calendario_eventos")
+}
+
+model GoogleCredential {
+  id                   Int       @id @default(1)
+  calendarId           String    @default("primary") @map("calendar_id")
+  refreshToken         String    @map("refresh_token")
+  accessToken          String?   @map("access_token")
+  accessTokenExpiresAt DateTime? @map("access_token_expires_at") @db.Timestamptz(6)
+  conectadoPor         String?   @map("conectado_por") @db.Uuid
+  atualizadoEm         DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("google_credentials")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  actorEmail String?  @map("actor_email")
+  actorNome  String?  @map("actor_nome")
+  acao       String
+  entidade   String?
+  entidadeId String?  @map("entidade_id")
+  detalhes   Json     @default("{}")
+  ip         String?
+  criadoEm   DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  @@index([criadoEm(sort: Desc)])
+  @@map("audit_logs")
+}
+
+model Conversa {
+  id                     String     @id @default(uuid()) @db.Uuid
+  waChatId               String?    @map("wa_chat_id")
+  telefone               String?
+  nomeWhatsapp           String?    @map("nome_whatsapp")
+  fotoUrl                String?    @map("foto_url")
+  contatoId              String?    @map("contato_id") @db.Uuid
+  contato                Contato?   @relation(fields: [contatoId], references: [id], onDelete: SetNull)
+  status                 String     @default("aberta")
+  ultimoEm               DateTime   @default(now()) @map("ultimo_em") @db.Timestamptz(6)
+  ultimaMsg              String?    @map("ultima_msg")
+  naoLidas               Int        @default(0) @map("nao_lidas")
+  ehGrupo                Boolean    @default(false) @map("eh_grupo")
+  fixada                 Boolean    @default(false)
+  naoLidaManual          Boolean    @default(false) @map("nao_lida_manual")
+  canal                  String     @default("whatsapp")
+  chatwootConversationId Int?       @map("chatwoot_conversation_id")
+  chatwootInboxId        Int?       @map("chatwoot_inbox_id")
+  chatwootContactId      Int?       @map("chatwoot_contact_id")
+  instagramUsername      String?    @map("instagram_username")
+  criadoEm               DateTime   @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm           DateTime   @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+  mensagens              Mensagem[]
+
+  @@map("conversas")
+}
+
+model Mensagem {
+  id                 String   @id @default(uuid()) @db.Uuid
+  conversaId         String   @map("conversa_id") @db.Uuid
+  conversa           Conversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+  waMessageId        String?  @map("wa_message_id")
+  direcao            String
+  corpo              String?
+  tipo               String   @default("text")
+  mediaUrl           String?  @map("media_url")
+  mediaMime          String?  @map("media_mime")
+  mediaNome          String?  @map("media_nome")
+  status             String?
+  autorId            String?  @map("autor_id") @db.Uuid
+  autorEmail         String?  @map("autor_email")
+  chatwootMessageId  Int?     @map("chatwoot_message_id")
+  criadoEm           DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  @@map("mensagens")
+}
+
+model EntradaLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  canal          String
+  origem         String?
+  payload        Json     @default("{}")
+  contatoId      String?  @map("contato_id") @db.Uuid
+  oportunidadeId String?  @map("oportunidade_id") @db.Uuid
+  erro           String?
+  ip             String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  @@map("entradas_log")
+}
+
+model Etiqueta {
+  id       String            @id @default(uuid()) @db.Uuid
+  nome     String
+  cor      String?
+  criadoEm DateTime          @default(now()) @map("criado_em") @db.Timestamptz(6)
+  contatos ContatoEtiqueta[]
+
+  @@map("etiquetas")
+}
+
+model ContatoEtiqueta {
+  id         String   @id @default(uuid()) @db.Uuid
+  contatoId  String   @map("contato_id") @db.Uuid
+  contato    Contato  @relation(fields: [contatoId], references: [id], onDelete: Cascade)
+  etiquetaId String   @map("etiqueta_id") @db.Uuid
+  etiqueta   Etiqueta @relation(fields: [etiquetaId], references: [id], onDelete: Cascade)
+
+  @@unique([contatoId, etiquetaId])
+  @@map("contato_etiquetas")
+}
+
+model IndicadorAds {
+  id              String   @id @default(uuid()) @db.Uuid
+  plataforma      String
+  periodoInicio   DateTime @map("periodo_inicio") @db.Date
+  periodoFim      DateTime @map("periodo_fim") @db.Date
+  contaId         String?  @map("conta_id")
+  contaNome       String?  @map("conta_nome")
+  campanhaId      String?  @map("campanha_id")
+  campanhaNome    String?  @map("campanha_nome")
+  investimento    Float?
+  impressoes      BigInt?
+  alcance         BigInt?
+  cliques         BigInt?
+  ctr             Float?
+  cpc             Float?
+  cpl             Float?
+  cpm             Float?
+  conversoes      Float?
+  leadsPlataforma Float?   @map("leads_plataforma")
+  receitaAds      Float?   @map("receita_ads")
+  roas            Float?
+  fonte           String   @default("plataforma")
+  payload         Json     @default("{}")
+  coletadoEm      DateTime @default(now()) @map("coletado_em") @db.Timestamptz(6)
+  criadoEm        DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm    DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@index([plataforma, coletadoEm(sort: Desc)])
+  @@map("indicadores_ads")
+}
+
+model IaTenantConfig {
+  id                     Boolean  @id @default(true)
+  persona                String   @default("")
+  oQuePodePrometer       String   @default("") @map("o_que_pode_prometer")
+  regraAtribuicao        String   @default("fixo") @map("regra_atribuicao")
+  responsavelPadrao      String   @default("Comercial") @map("responsavel_padrao")
+  prazoSemRespostaHoras  Int      @default(24) @map("prazo_sem_resposta_horas")
+  diasSemAtividade       Int      @default(7) @map("dias_sem_atividade")
+  campanhaFriaAprovada   Boolean  @default(false) @map("campanha_fria_aprovada")
+  atualizadoEm           DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+  atualizadoPor          String?  @map("atualizado_por") @db.Uuid
+
+  @@map("ia_tenant_config")
+}
+
+model IaConsulta {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
+  modo           String
+  provider       String   @default("openai")
+  modelo         String?
+  pergunta       String?
+  resposta       String?
+  citacoes       Json     @default("[]")
+  oportunidadeId String?  @map("oportunidade_id") @db.Uuid
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  @@map("ia_consultas")
+}
+
+model IaProposta {
+  id                   String    @id @default(uuid()) @db.Uuid
+  oportunidadeId       String    @map("oportunidade_id") @db.Uuid
+  userId               String    @map("user_id") @db.Uuid
+  status               String    @default("pendente")
+  perigo               String    @default("normal")
+  payload              Json      @default("{}")
+  afetados             Json      @default("[]")
+  confirmacaoExplicita String?   @map("confirmacao_explicita")
+  criadoEm             DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  resolvidoEm          DateTime? @map("resolvido_em") @db.Timestamptz(6)
+
+  @@map("ia_propostas")
+}
+
+model DadosConversa {
+  id                     Int      @id @default(autoincrement())
+  telefone               String
+  nome                   String?
+  conversationId         String   @map("conversation_id")
+  etapa                  String   @default("")
+  qualificacao           Json     @default("{}")
+  origem                 String?
+  chatwootConversationId String?  @map("chatwoot_conversation_id")
+  chatwootContactId      String?  @map("chatwoot_contact_id")
+  ativadaEm              DateTime? @map("ativada_em") @db.Timestamptz(6)
+  qtdInteracao           Int      @default(0) @map("qtd_interacao")
+  inicioInt              DateTime @default(now()) @map("inicio_int") @db.Timestamptz(6)
+  ultimaInt              DateTime? @map("ultima_int") @db.Timestamptz(6)
+  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("dados_conversa")
+}
+
+model HistoricoMensagem {
+  id             Int      @id @default(autoincrement())
+  conversationId String   @map("conversation_id")
+  telefone       String
+  role           String
+  content        String
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("historico_mensagens")
+}
+
+model PausarIa {
+  id        Int      @id @default(autoincrement())
+  telefone  String
+  nome      String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("pausar_ia")
+}
+
+model Orcamento {
+  id             String    @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String    @default("rascunho")
+  valor          Float?
+  validade       DateTime? @db.Date
+  contatoId      String?   @map("contato_id") @db.Uuid
+  oportunidadeId String?   @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+  pedidos        Pedido[]
+
+  @@map("orcamentos")
+}
+
+model Proposta {
+  id             String    @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String    @default("rascunho")
+  valor          Float?
+  validade       DateTime? @db.Date
+  contatoId      String?   @map("contato_id") @db.Uuid
+  oportunidadeId String?   @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("propostas")
+}
+
+model Pedido {
+  id             String     @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String     @default("em_execucao")
+  valor          Float?
+  orcamentoId    String?    @map("orcamento_id") @db.Uuid
+  orcamento      Orcamento? @relation(fields: [orcamentoId], references: [id], onDelete: SetNull)
+  contatoId      String?    @map("contato_id") @db.Uuid
+  oportunidadeId String?    @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime   @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime   @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("pedidos")
+}
+
+model Ligacao {
+  id             String   @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String   @default("registrada")
+  direcao        String   @default("saida")
+  duracaoSeg     Int?     @map("duracao_seg")
+  resultado      String?
+  contatoId      String?  @map("contato_id") @db.Uuid
+  oportunidadeId String?  @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("ligacoes")
+}
+
+model NpsResposta {
+  id             String   @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String   @default("enviado")
+  score          Int?
+  canal          String?
+  contatoId      String?  @map("contato_id") @db.Uuid
+  oportunidadeId String?  @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("nps_respostas")
+}
+
+model Diagnostico {
+  id             String   @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String   @default("aberto")
+  indice         Float?
+  eixo           String?
+  contatoId      String?  @map("contato_id") @db.Uuid
+  oportunidadeId String?  @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("diagnosticos")
+}
+
+model ReuniaoNota {
+  id             String    @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String    @default("registrada")
+  dataReuniao    DateTime? @map("data_reuniao") @db.Date
+  contatoId      String?   @map("contato_id") @db.Uuid
+  oportunidadeId String?   @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("reuniao_notas")
+}
+
+model Prospeccao {
+  id             String   @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String   @default("fila")
+  origem         String?
+  proximoPasso   String?  @map("proximo_passo")
+  contatoId      String?  @map("contato_id") @db.Uuid
+  oportunidadeId String?  @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("prospeccao")
+}
+
+model EmailCampanha {
+  id             String   @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String   @default("rascunho")
+  assunto        String?
+  contatoId      String?  @map("contato_id") @db.Uuid
+  oportunidadeId String?  @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("email_campanhas")
+}
+
+model Planejamento {
+  id             String    @id @default(uuid()) @db.Uuid
+  titulo         String
+  status         String    @default("planejado")
+  semanaInicio   DateTime? @map("semana_inicio") @db.Date
+  meta           String?
+  contatoId      String?   @map("contato_id") @db.Uuid
+  oportunidadeId String?   @map("oportunidade_id") @db.Uuid
+  responsavel    String?
+  notas          String?
+  criadoEm       DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("planejamento")
+}
+
+model CampoPersonalizado {
+  id         String   @id @default(uuid()) @db.Uuid
+  titulo     String
+  status     String   @default("ativo")
+  entidade   String   @default("contato")
+  chave      String
+  tipoCampo  String   @default("texto") @map("tipo_campo")
+  obrigatorio Boolean @default(false)
+  notas      String?
+  criadoEm   DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@unique([entidade, chave])
+  @@map("campos_personalizados")
+}
+
+model AutomacaoRegra {
+  id           String   @id @default(uuid()) @db.Uuid
+  titulo       String
+  status       String   @default("ativa")
+  evento       String
+  acao         String
+  ativo        Boolean  @default(true)
+  notas        String?
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("automacao_regras")
+}
+
+model Melhoria {
+  id           String    @id @default(uuid()) @db.Uuid
+  titulo       String
+  descricao    String?
+  status       String    @default("aberta")
+  prioridade   String?
+  criadoPor    String?   @map("criado_por") @db.Uuid
+  notas        String?
+  criadoEm     DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm DateTime  @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("melhorias")
+}
+
+model RemarketingCampanha {
+  id           String   @id @default(uuid()) @db.Uuid
+  titulo       String   @default("campanha")
+  status       String   @default("ativa")
+  config       Json     @default("{}")
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("remarketing_campanha")
+}
+
+model RemarketingAcao {
+  id           String   @id @default(uuid()) @db.Uuid
+  titulo       String
+  status       String   @default("fila")
+  payload      Json     @default("{}")
+  contatoId    String?  @map("contato_id") @db.Uuid
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("remarketing_acoes")
+}
+
+model LgpdConfig {
+  id           Boolean  @id @default(true)
+  texto        String   @default("")
+  ativo        Boolean  @default(true)
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("lgpd_config")
+}
+
+model LgpdSolicitacao {
+  id           String   @id @default(uuid()) @db.Uuid
+  tipo         String
+  status       String   @default("aberta")
+  solicitante  String?
+  detalhes     Json     @default("{}")
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  @@map("lgpd_solicitacoes")
+}
+
+model LgpdConsentimento {
+  id       String   @id @default(uuid()) @db.Uuid
+  userId   String?  @map("user_id") @db.Uuid
+  aceito   Boolean  @default(true)
+  criadoEm DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  @@map("lgpd_consentimentos")
+}
+
+model GptConversa {
+  id         String        @id @default(uuid()) @db.Uuid
+  titulo     String        @default("Nova conversa")
+  userId     String?       @map("user_id") @db.Uuid
+  criadoEm   DateTime      @default(now()) @map("criado_em") @db.Timestamptz(6)
+  mensagens  GptMensagem[]
+
+  @@map("gpt_conversas")
+}
+
+model GptMensagem {
+  id         String      @id @default(uuid()) @db.Uuid
+  conversaId String      @map("conversa_id") @db.Uuid
+  conversa   GptConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+  role       String
+  content    String
+  criadoEm   DateTime    @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  @@map("gpt_mensagens")
+}
+
+model Auditoria {
+  id       String   @id @default(uuid()) @db.Uuid
+  tipo     String
+  status   String
+  detalhes Json     @default("{}")
+  criadoEm DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  @@map("auditorias")
+}
+
+model TelefoneMatriculado {
+  id      String @id @default(uuid()) @db.Uuid
+  sufixo8 String @unique @map("sufixo8")
+
+  @@map("telefones_matriculados")
+}
+
+model EmailMatriculado {
+  id    String @id @default(uuid()) @db.Uuid
+  email String @unique
+
+  @@map("emails_matriculados")
+}
