@@ -16,16 +16,13 @@ export const hasRealSupabase =
   !/YOUR_PROJECT_REF|placeholder\.supabase\.co/i.test(url);
 
 /**
- * Demo de UI sem login real.
- * Liga com VITE_UI_PREVIEW=true, ou automaticamente no `npm run dev` se não houver API Nest nem Supabase.
- * Nunca entra sozinho em `vite build` (produção).
+ * Botão "Demonstração (sem dados reais)" na tela de login.
+ * Liga com VITE_UI_PREVIEW=true, ou no `npm run dev` (desliga com VITE_UI_PREVIEW=false).
+ * Nunca entra sozinho em `vite build` de produção — precisa da flag.
  */
 export const isUiPreview =
   import.meta.env.VITE_UI_PREVIEW === "true" ||
-  (Boolean(import.meta.env.DEV) && !hasRealApi && !hasRealSupabase);
-
-/** Dados fictícios em memória — só quando o preview está on e não há backend. */
-export const usesPreviewData = isUiPreview && !hasRealApi && !hasRealSupabase;
+  (Boolean(import.meta.env.DEV) && import.meta.env.VITE_UI_PREVIEW !== "false");
 
 const PREVIEW_KEY = "crm-ui-preview";
 
@@ -46,7 +43,13 @@ export function clearPreviewSession(): void {
   localStorage.removeItem(PREVIEW_KEY);
 }
 
-if (!hasRealApi && !hasRealSupabase && !usesPreviewData) {
+/** Dados fictícios em memória: sessão Demonstração, ou preview sem backend. */
+export function usesPreviewData(): boolean {
+  if (isPreviewSessionActive()) return true;
+  return isUiPreview && !hasRealApi && !hasRealSupabase;
+}
+
+if (!hasRealApi && !hasRealSupabase && !isUiPreview) {
   // eslint-disable-next-line no-console
   console.error(
     "[Sistema CRM] Defina VITE_API_URL (Nest) ou VITE_SUPABASE_URL no .env.local",
@@ -71,6 +74,20 @@ function liveClient(): SupabaseClient<Database> {
   );
 }
 
-export const supabase: SupabaseClient<Database> = usesPreviewData
+const previewClient = isUiPreview
   ? (createPreviewClient() as unknown as SupabaseClient<Database>)
-  : liveClient();
+  : null;
+const apiClient = liveClient();
+
+function activeClient(): SupabaseClient<Database> {
+  if (previewClient && usesPreviewData()) return previewClient;
+  return apiClient;
+}
+
+export const supabase: SupabaseClient<Database> = new Proxy({} as SupabaseClient<Database>, {
+  get(_target, prop) {
+    const client = activeClient() as unknown as Record<PropertyKey, unknown>;
+    const value = client[prop];
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});

@@ -65,7 +65,7 @@ async function perguntarPreview(pergunta: string, oportunidadeId?: string): Prom
 }
 
 export async function perguntarAoCrm(pergunta: string, oportunidadeId?: string): Promise<IaRespostaLeitura> {
-  if (usesPreviewData) return perguntarPreview(pergunta, oportunidadeId);
+  if (usesPreviewData()) return perguntarPreview(pergunta, oportunidadeId);
   const data = await invoke<IaRespostaLeitura>({
     acao: "perguntar",
     pergunta,
@@ -133,7 +133,7 @@ async function sugerirPreview(oportunidadeId: string, pergunta?: string): Promis
 }
 
 export async function sugerirAcao(oportunidadeId: string, pergunta?: string): Promise<IaProposta> {
-  if (usesPreviewData) return sugerirPreview(oportunidadeId, pergunta);
+  if (usesPreviewData()) return sugerirPreview(oportunidadeId, pergunta);
   const data = await invoke<{ ok: boolean; proposta: IaProposta; error?: string }>({
     acao: "sugerir",
     oportunidade_id: oportunidadeId,
@@ -147,7 +147,7 @@ export async function confirmarProposta(
   propostaId: string,
   opts?: { confirmacaoExplicita?: string },
 ): Promise<{ ok: boolean; gravado?: unknown; error?: string; afetados?: unknown }> {
-  if (usesPreviewData) {
+  if (usesPreviewData()) {
     const { data: p } = await supabase.from("ia_propostas").select("*").eq("id", propostaId).maybeSingle();
     if (!p || p.status !== "pendente") throw new Error("proposta_nao_encontrada");
     if (p.perigo === "apagar" || p.perigo === "disparo_massa") {
@@ -195,7 +195,7 @@ export async function confirmarProposta(
 }
 
 export async function recusarProposta(propostaId: string): Promise<void> {
-  if (usesPreviewData) {
+  if (usesPreviewData()) {
     await supabase.from("ia_propostas").update({ status: "recusada" }).eq("id", propostaId);
     return;
   }
@@ -203,7 +203,7 @@ export async function recusarProposta(propostaId: string): Promise<void> {
 }
 
 export async function carregarIaConfig(): Promise<IaTenantConfig> {
-  if (usesPreviewData) {
+  if (usesPreviewData()) {
     const { data } = await supabase.from("ia_tenant_config").select("*").eq("id", true).maybeSingle();
     return (
       data ?? {
@@ -222,7 +222,7 @@ export async function carregarIaConfig(): Promise<IaTenantConfig> {
 }
 
 export async function salvarIaConfig(patch: Partial<IaTenantConfig>): Promise<IaTenantConfig> {
-  if (usesPreviewData) {
+  if (usesPreviewData()) {
     await supabase.from("ia_tenant_config").update(patch).eq("id", true);
     return carregarIaConfig();
   }
